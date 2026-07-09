@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact — Seppe Verbeke</title>
+  <meta name="description" content="Boek een intake of stuur een bericht — bespreek welk proces in jouw kmo klaar is voor automatisatie of AI.">
+  <link rel="canonical" href="https://seppeverbeke.be/contact.html">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="/" class="wordmark">seppeverbeke<span class="wordmark-dot">.</span></a>
+      <nav class="site-nav" id="site-nav">
+        <a href="/diensten.html">Diensten</a>
+        <a href="/cases.html">Cases</a>
+        <a href="/over-mij.html">Over mij</a>
+        <a href="/blog.html">Inzichten</a>
+        <a href="/contact.html" class="btn btn-primary btn-sm" aria-current="page">Contact</a>
+      </nav>
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="site-nav" aria-label="Menu openen">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="section container">
+      <div class="split reveal">
+        <div class="split-body">
+          <span class="eyebrow">Contact</span>
+          <h1>Vertel me over jouw proces.</h1>
+          <p class="lede">Korte omschrijving, geen verplichtingen. Ik antwoord binnen 1 werkdag.</p>
+
+          <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="margin-top: var(--seppeverbeke-space-6);">
+            <input type="hidden" name="form-name" value="contact">
+            <p class="form-field" style="display:none;">
+              <label>Laat dit veld leeg<input name="bot-field"></label>
+            </p>
+
+            <div class="form-field">
+              <label for="name">Naam</label>
+              <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-field">
+              <label for="company">Bedrijf</label>
+              <input type="text" id="company" name="company" required>
+            </div>
+            <div class="form-field">
+              <label for="email">E-mail</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-field">
+              <label for="message">Korte omschrijving</label>
+              <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Verstuur bericht</button>
+          </form>
+        </div>
+
+        <div class="split-body">
+          <div class="card">
+            <span class="eyebrow">Rechtstreeks contact</span>
+            <h3>Liever meteen een afspraak?</h3>
+            <p>Mail naar <a href="mailto:hallo@seppeverbeke.be" style="color:var(--seppeverbeke-lavender-700); font-weight:600;">hallo@seppeverbeke.be</a> of plan zelf een intake in via de agenda-link die hier binnenkort staat.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <a href="/" class="wordmark">seppeverbeke<span class="wordmark-dot">.</span></a>
+        <p>AI &amp; automatisatie voor Belgische kmo's.</p>
+      </div>
+      <nav class="footer-nav">
+        <a href="/diensten.html">Diensten</a>
+        <a href="/cases.html">Cases</a>
+        <a href="/over-mij.html">Over mij</a>
+        <a href="/blog.html">Inzichten</a>
+        <a href="/contact.html">Contact</a>
+      </nav>
+      <div class="footer-cta">
+        <a href="/contact.html" class="btn btn-primary">Boek een intake</a>
+        <a href="mailto:hallo@seppeverbeke.be">hallo@seppeverbeke.be</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; <span id="year"></span> Seppe Verbeke. Alle rechten voorbehouden.</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>
