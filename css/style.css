@@ -311,7 +311,7 @@ p { margin: 0; }
     position: absolute;
     top: 0;
     right: 0;
-    width: 400px;
+    width: 460px;
     height: 500px;
     z-index: 1;
   }
@@ -332,7 +332,15 @@ p { margin: 0; }
   font-weight: 600;
   color: var(--seppeverbeke-ink-900);
   white-space: nowrap;
+  scale: 1;
   animation: hero-logo-float 6s ease-in-out infinite;
+  transition: scale var(--seppeverbeke-transition), box-shadow var(--seppeverbeke-transition);
+}
+.hero-logo-chip:hover {
+  animation-play-state: paused;
+  scale: 1.15;
+  box-shadow: 0 12px 32px rgba(20, 21, 26, 0.14);
+  z-index: 2;
 }
 .hero-logo-dot {
   width: 12px;
@@ -340,17 +348,17 @@ p { margin: 0; }
   border-radius: 50%;
   flex-shrink: 0;
 }
-.hero-logo-chip--claude   { top: 0;    right: 50px; animation-delay: 0s; }
-.hero-logo-chip--chatgpt  { top: 72px;  right: 6px;  animation-delay: 1.2s; }
-.hero-logo-chip--zapier   { top: 144px; right: 64px; animation-delay: 0.6s; }
-.hero-logo-chip--n8n      { top: 216px; right: 10px; animation-delay: 1.8s; }
-.hero-logo-chip--microsoft{ top: 288px; right: 76px; animation-delay: 0.3s; }
-.hero-logo-chip--excel    { top: 360px; right: 20px; animation-delay: 0.9s; }
-.hero-logo-chip--odoo     { top: 432px; right: 60px; animation-delay: 1.5s; }
+.hero-logo-chip--claude   { top: 0;    right: 80px;  animation-delay: 0s; }
+.hero-logo-chip--chatgpt  { top: 72px;  right: 10px;  animation-delay: 1.2s; }
+.hero-logo-chip--zapier   { top: 144px; right: 190px; animation-delay: 0.6s; }
+.hero-logo-chip--n8n      { top: 216px; right: 40px;  animation-delay: 1.8s; }
+.hero-logo-chip--microsoft{ top: 288px; right: 150px; animation-delay: 0.3s; }
+.hero-logo-chip--excel    { top: 360px; right: 0;     animation-delay: 0.9s; }
+.hero-logo-chip--odoo     { top: 432px; right: 120px; animation-delay: 1.5s; }
 
 @keyframes hero-logo-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-logo-chip { animation: none; }
