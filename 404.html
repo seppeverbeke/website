@@ -30,10 +30,23 @@
 
   <main class="container">
     <div class="error-page">
-      <span class="eyebrow">404</span>
-      <p class="stat-number">Oeps.</p>
-      <h1>Deze pagina bestaat niet (meer).</h1>
+      <span class="error-blob error-blob--a" aria-hidden="true"></span>
+      <span class="error-blob error-blob--b" aria-hidden="true"></span>
+
+      <span class="eyebrow">Foutcode 404</span>
+      <span class="error-code" data-text="404" aria-hidden="true">404</span>
+      <span class="error-code-hint">psst — hover eens over die 404</span>
+
+      <h1>Oeps, deze pagina bestaat niet (meer).</h1>
       <p class="lede">Misschien verkeerd getypt, misschien verplaatst. Ga terug naar de homepage of bekijk de diensten.</p>
+
+      <div class="error-terminal">
+        <div class="error-terminal-bar"><span></span><span></span><span></span></div>
+        <p><span class="error-terminal-prompt">$</span>curl seppeverbeke.be<span class="error-terminal-path">/deze-pagina</span></p>
+        <p class="error-terminal-out">→ 404 Not Found</p>
+        <p class="error-terminal-out">→ Automatisatie lost veel op, maar geen dode links. Probeer de <a href="/">homepage</a>.</p>
+      </div>
+
       <div class="hero-actions">
         <a href="/" class="btn btn-primary">Naar de homepage</a>
         <a href="/diensten.html" class="btn btn-secondary">Bekijk diensten</a>
