@@ -37,7 +37,7 @@
           <h1>Vertel me over jouw proces.</h1>
           <p class="lede">Korte omschrijving, geen verplichtingen. Ik antwoord binnen 1 werkdag.</p>
 
-          <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="margin-top: var(--seppeverbeke-space-6);">
+          <form name="contact" id="contact-form" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="margin-top: var(--seppeverbeke-space-6);">
             <input type="hidden" name="form-name" value="contact">
             <p class="form-field" style="display:none;">
               <label>Laat dit veld leeg<input name="bot-field"></label>
@@ -60,7 +60,16 @@
               <textarea id="message" name="message" required></textarea>
             </div>
             <button type="submit" class="btn btn-primary">Verstuur bericht</button>
+            <p id="contact-form-error" class="form-error" role="alert" style="display:none;">Hmm, dat lukte niet. Probeer het opnieuw of mail rechtstreeks naar <a href="mailto:seppeverbeke@hotmail.com">seppeverbeke@hotmail.com</a>.</p>
           </form>
+
+          <div id="contact-success" class="form-success reveal" role="status" style="display:none; margin-top: var(--seppeverbeke-space-6);">
+            <span class="form-success-check" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M5 12.5L10 17.5L19 7.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+            <h3>Verzonden!</h3>
+            <p>Bedankt, je bericht is onderweg. Ik antwoord binnen 1 werkdag — tot dan!</p>
+          </div>
         </div>
 
         <div class="split-body">

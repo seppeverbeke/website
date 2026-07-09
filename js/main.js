@@ -52,3 +52,38 @@ if ('IntersectionObserver' in window && revealTargets.length) {
 // Footer year
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+// Contact form: submit via AJAX so we can show an inline success message
+// instead of redirecting to Netlify's default thank-you page
+const contactForm = document.getElementById('contact-form');
+if (contactForm) {
+  const contactSuccess = document.getElementById('contact-success');
+  const contactError = document.getElementById('contact-form-error');
+
+  const encodeFormData = (data) =>
+    Object.keys(data)
+      .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(data[key]))
+      .join('&');
+
+  contactForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    contactError.style.display = 'none';
+
+    const formData = Object.fromEntries(new FormData(contactForm));
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: encodeFormData(formData),
+    })
+      .then(() => {
+        contactForm.style.display = 'none';
+        contactSuccess.style.display = 'block';
+        requestAnimationFrame(() => contactSuccess.classList.add('is-visible'));
+        contactSuccess.setAttribute('tabindex', '-1');
+        contactSuccess.focus();
+      })
+      .catch(() => {
+        contactError.style.display = 'block';
+      });
+  });
+}

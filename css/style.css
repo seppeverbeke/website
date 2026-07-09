@@ -562,6 +562,36 @@ p { margin: 0; }
 }
 .form-field textarea { resize: vertical; min-height: 120px; }
 
+.form-error {
+  margin-top: var(--seppeverbeke-space-3);
+  font-size: 14px;
+  color: #C0324A;
+}
+.form-error a { color: inherit; text-decoration: underline; }
+
+.form-success {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--seppeverbeke-space-2);
+  background: var(--seppeverbeke-lavender-100);
+  border: 1px solid var(--seppeverbeke-lavender-300);
+  border-radius: var(--seppeverbeke-radius-card);
+  padding: var(--seppeverbeke-space-5);
+}
+.form-success-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--seppeverbeke-lavender-700);
+  color: #FFFFFF;
+}
+.form-success h3 { margin: 0; }
+.form-success p { margin: 0; color: var(--seppeverbeke-ink-500); }
+
 /* ==========================================================================
    Footer
    ========================================================================== */
