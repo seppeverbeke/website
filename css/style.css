@@ -238,7 +238,7 @@ p { margin: 0; }
   transition: right var(--seppeverbeke-transition);
 }
 .site-nav a:not(.btn):hover::after { right: 0; }
-.site-nav a[aria-current="page"] { color: var(--seppeverbeke-lavender-700); }
+.site-nav a:not(.btn)[aria-current="page"] { color: var(--seppeverbeke-lavender-700); }
 
 .nav-toggle {
   display: flex;
@@ -311,8 +311,8 @@ p { margin: 0; }
     position: absolute;
     top: 0;
     right: 0;
-    width: 340px;
-    height: 380px;
+    width: 400px;
+    height: 500px;
     z-index: 1;
   }
 }
@@ -321,30 +321,32 @@ p { margin: 0; }
   position: absolute;
   display: inline-flex;
   align-items: center;
-  gap: var(--seppeverbeke-space-2);
+  gap: var(--seppeverbeke-space-3);
   background: var(--seppeverbeke-surface);
   border: 1px solid var(--seppeverbeke-line);
   border-radius: var(--seppeverbeke-radius-pill);
-  padding: 10px 16px;
+  padding: 14px 22px;
   box-shadow: var(--seppeverbeke-shadow-card);
   font-family: var(--seppeverbeke-font-mono);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--seppeverbeke-ink-900);
   white-space: nowrap;
   animation: hero-logo-float 6s ease-in-out infinite;
 }
 .hero-logo-dot {
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   flex-shrink: 0;
 }
-.hero-logo-chip--claude   { top: 0;    right: 40px; animation-delay: 0s; }
-.hero-logo-chip--chatgpt  { top: 78px; right: 0;    animation-delay: 1.2s; }
-.hero-logo-chip--zapier   { top: 158px; right: 56px; animation-delay: 0.6s; }
-.hero-logo-chip--n8n      { top: 232px; right: 4px;  animation-delay: 1.8s; }
-.hero-logo-chip--microsoft{ top: 306px; right: 72px; animation-delay: 0.3s; }
+.hero-logo-chip--claude   { top: 0;    right: 50px; animation-delay: 0s; }
+.hero-logo-chip--chatgpt  { top: 72px;  right: 6px;  animation-delay: 1.2s; }
+.hero-logo-chip--zapier   { top: 144px; right: 64px; animation-delay: 0.6s; }
+.hero-logo-chip--n8n      { top: 216px; right: 10px; animation-delay: 1.8s; }
+.hero-logo-chip--microsoft{ top: 288px; right: 76px; animation-delay: 0.3s; }
+.hero-logo-chip--excel    { top: 360px; right: 20px; animation-delay: 0.9s; }
+.hero-logo-chip--odoo     { top: 432px; right: 60px; animation-delay: 1.5s; }
 
 @keyframes hero-logo-float {
   0%, 100% { transform: translateY(0); }
