@@ -312,7 +312,7 @@ p { margin: 0; }
     top: 0;
     right: 0;
     width: 520px;
-    height: 620px;
+    height: 780px;
     z-index: 1;
   }
 }
@@ -355,6 +355,8 @@ p { margin: 0; }
 .hero-logo-chip--microsoft{ top: 376px; right: 210px; animation-delay: 0.3s; }
 .hero-logo-chip--excel    { top: 458px; right: 0;     animation-delay: 0.9s; }
 .hero-logo-chip--odoo     { top: 540px; right: 170px; animation-delay: 1.5s; }
+.hero-logo-chip--power-automate { top: 622px; right: 140px; animation-delay: 2.1s; }
+.hero-logo-chip--plaud          { top: 704px; right: 230px; animation-delay: 2.4s; }
 
 @keyframes hero-logo-float {
   0%, 100% { translate: 0 0; }
@@ -407,6 +409,21 @@ p { margin: 0; }
 }
 .card .eyebrow { margin-bottom: 0; }
 .card p { color: var(--seppeverbeke-ink-500); }
+
+.case-meta {
+  display: block;
+  font-family: var(--seppeverbeke-font-mono);
+  font-size: 12px;
+  color: var(--seppeverbeke-ink-500);
+  margin-top: calc(-1 * var(--seppeverbeke-space-1));
+}
+
+.tool-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--seppeverbeke-space-2);
+  margin-top: var(--seppeverbeke-space-2);
+}
 
 /* ==========================================================================
    Text + image
