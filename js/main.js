@@ -49,6 +49,55 @@ if ('IntersectionObserver' in window && revealTargets.length) {
   revealTargets.forEach((el) => el.classList.add('is-visible'));
 }
 
+// Portfolio filter bar (filter cases by project type)
+const portfolioGrid = document.getElementById('portfolio-grid');
+if (portfolioGrid) {
+  const filterBar = document.querySelector('.filter-bar');
+  const filterCount = document.getElementById('filter-count');
+  const emptyState = document.getElementById('portfolio-empty');
+  const cards = Array.from(portfolioGrid.querySelectorAll('.card'));
+  const totalCount = cards.length;
+
+  const applyFilter = (filter) => {
+    let visible = 0;
+    cards.forEach((card) => {
+      const isMatch = filter === 'all' || card.dataset.category === filter;
+      if (isMatch) {
+        card.classList.remove('is-filtered-out');
+        card.classList.remove('card-enter');
+        void card.offsetWidth; // restart the fade-in animation
+        card.classList.add('card-enter');
+        visible += 1;
+      } else {
+        card.classList.add('is-filtered-out');
+      }
+    });
+    if (filterCount) {
+      filterCount.textContent =
+        filter === 'all' ? `${totalCount} projecten` : `${visible} van ${totalCount} projecten`;
+    }
+    if (emptyState) emptyState.hidden = visible !== 0;
+  };
+
+  if (filterBar) {
+    const pills = Array.from(filterBar.querySelectorAll('.filter-pill'));
+    pills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        if (pill.classList.contains('is-active')) return;
+        pills.forEach((p) => {
+          p.classList.remove('is-active');
+          p.setAttribute('aria-pressed', 'false');
+        });
+        pill.classList.add('is-active');
+        pill.setAttribute('aria-pressed', 'true');
+        applyFilter(pill.dataset.filter);
+      });
+    });
+  }
+
+  if (filterCount) filterCount.textContent = `${totalCount} projecten`;
+}
+
 // Footer year
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();

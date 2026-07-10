@@ -289,17 +289,6 @@ p { margin: 0; }
   overflow: hidden;
   padding-block: var(--seppeverbeke-space-8) var(--section-padding);
 }
-.hero-blob {
-  position: absolute;
-  top: -80px;
-  right: -80px;
-  width: 620px;
-  height: 620px;
-  border-radius: 50%;
-  background: var(--seppeverbeke-lavender-100);
-  filter: blur(2px);
-  z-index: 0;
-}
 
 .hero-grid {
   position: relative;
@@ -327,6 +316,15 @@ p { margin: 0; }
     position: relative;
     min-height: 600px;
   }
+}
+
+.hero-blob {
+  position: absolute;
+  inset: -64px -80px -64px -64px;
+  border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%;
+  background: var(--seppeverbeke-lavender-100);
+  filter: blur(2px);
+  z-index: 0;
 }
 
 .hero-logo-chip {
@@ -447,6 +445,69 @@ p { margin: 0; }
   color: var(--seppeverbeke-lavender-700);
 }
 .icon-card h3 { margin-top: var(--seppeverbeke-space-1); }
+
+.card-icon-sm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--seppeverbeke-lavender-100);
+  color: var(--seppeverbeke-lavender-700);
+  transition: background var(--seppeverbeke-transition), color var(--seppeverbeke-transition);
+}
+.card-icon-sm svg { width: 18px; height: 18px; }
+.card:hover .card-icon-sm {
+  background: var(--seppeverbeke-lavender-700);
+  color: #FFFFFF;
+}
+
+/* ==========================================================================
+   Filter bar (portfolio)
+   ========================================================================== */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--seppeverbeke-space-2);
+  margin-bottom: var(--seppeverbeke-space-3);
+}
+.filter-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 18px;
+  border-radius: var(--seppeverbeke-radius-pill);
+  border: 1.5px solid var(--seppeverbeke-line);
+  background: var(--seppeverbeke-surface);
+  font-family: var(--seppeverbeke-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--seppeverbeke-ink-500);
+  transition: background var(--seppeverbeke-transition), border-color var(--seppeverbeke-transition), color var(--seppeverbeke-transition), transform var(--seppeverbeke-transition);
+}
+.filter-pill:hover {
+  border-color: var(--seppeverbeke-lavender-700);
+  color: var(--seppeverbeke-ink-900);
+}
+.filter-pill.is-active {
+  background: var(--seppeverbeke-lavender-700);
+  border-color: var(--seppeverbeke-lavender-700);
+  color: #FFFFFF;
+}
+.filter-count {
+  font-family: var(--seppeverbeke-font-mono);
+  font-size: 13px;
+  color: var(--seppeverbeke-ink-500);
+  margin: 0 0 var(--seppeverbeke-space-4);
+}
+
+.tile-grid .card.is-filtered-out { display: none; }
+
+@keyframes card-fade-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.tile-grid .card.card-enter { animation: card-fade-in 0.35s ease both; }
 
 .step-number {
   font-family: var(--seppeverbeke-font-mono);
