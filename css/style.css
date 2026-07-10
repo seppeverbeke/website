@@ -319,12 +319,21 @@ p { margin: 0; }
 }
 
 .hero-blob {
-  position: absolute;
-  inset: -64px -80px -64px -64px;
-  border-radius: 64px;
-  background: var(--seppeverbeke-lavender-100);
-  filter: blur(2px);
-  z-index: 0;
+  display: none;
+}
+@media (min-width: 1200px) {
+  .hero-blob {
+    display: block;
+    position: absolute;
+    top: -120px;
+    right: -180px;
+    width: 760px;
+    height: 760px;
+    border-radius: 50%;
+    background: var(--seppeverbeke-lavender-100);
+    filter: blur(2px);
+    z-index: 0;
+  }
 }
 
 .hero-logo-chip {
