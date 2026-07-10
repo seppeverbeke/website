@@ -321,7 +321,7 @@ p { margin: 0; }
 .hero-blob {
   position: absolute;
   inset: -64px -80px -64px -64px;
-  border-radius: 44% 56% 52% 48% / 48% 44% 56% 52%;
+  border-radius: 64px;
   background: var(--seppeverbeke-lavender-100);
   filter: blur(2px);
   z-index: 0;
