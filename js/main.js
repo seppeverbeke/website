@@ -49,6 +49,39 @@ if ('IntersectionObserver' in window && revealTargets.length) {
   revealTargets.forEach((el) => el.classList.add('is-visible'));
 }
 
+// Count-up animation for stat numbers (e.g. over-mij.html)
+const statNumbers = document.querySelectorAll('.stat-number');
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (statNumbers.length && 'IntersectionObserver' in window && !prefersReducedMotion) {
+  const animateCount = (el) => {
+    const match = el.textContent.trim().match(/^(\d+)(.*)$/);
+    if (!match) return;
+    const target = parseInt(match[1], 10);
+    const suffix = match[2];
+    const duration = 1100;
+    const start = performance.now();
+    const step = (now) => {
+      const progress = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.round(target * eased) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  const statObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          animateCount(entry.target);
+          statObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.4 }
+  );
+  statNumbers.forEach((el) => statObserver.observe(el));
+}
+
 // Portfolio filter bar (filter cases by project type)
 const portfolioGrid = document.getElementById('portfolio-grid');
 if (portfolioGrid) {
