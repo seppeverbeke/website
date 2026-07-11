@@ -660,6 +660,10 @@ p { margin: 0; }
 .split-body a:hover { transform: translateX(4px); }
 .split-body p { color: var(--seppeverbeke-ink-500); margin-top: var(--seppeverbeke-space-3); }
 
+.case-body { max-width: 680px; }
+.case-body p { color: var(--seppeverbeke-ink-900); }
+.case-body p + p { margin-top: var(--seppeverbeke-space-4); }
+
 .back-link {
   display: inline-flex;
   align-items: center;
