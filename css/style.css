@@ -76,6 +76,23 @@ input, textarea { font: inherit; }
 }
 
 /* ==========================================================================
+   Focus states
+   ========================================================================== */
+:focus-visible {
+  outline: 2px solid var(--seppeverbeke-lavender-500);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.btn:focus-visible {
+  outline-offset: 3px;
+}
+.nav-toggle:focus-visible,
+.card:focus-visible,
+.stat-card:focus-visible {
+  outline-offset: 2px;
+}
+
+/* ==========================================================================
    Typography
    ========================================================================== */
 h1, h2, h3 {
@@ -930,6 +947,11 @@ p { margin: 0; }
   outline: none;
   border-color: var(--seppeverbeke-lavender-700);
 }
+.form-field input:focus-visible, .form-field textarea:focus-visible {
+  outline: none;
+  border-color: var(--seppeverbeke-lavender-700);
+  box-shadow: 0 0 0 3px var(--seppeverbeke-lavender-100);
+}
 .form-field textarea { resize: vertical; min-height: 120px; }
 
 .form-error {
@@ -1007,10 +1029,46 @@ p { margin: 0; }
   letter-spacing: 0.06em;
 }
 .empty-state {
+  position: relative;
   text-align: center;
   padding-block: var(--seppeverbeke-space-8);
   color: var(--seppeverbeke-ink-500);
+  overflow: hidden;
 }
+.empty-state-blob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 260px;
+  height: 260px;
+  background: var(--seppeverbeke-lavender-100);
+  border-radius: 50%;
+  filter: blur(2px);
+  transform: translate(-50%, -55%);
+  z-index: 0;
+  opacity: 0.7;
+}
+.empty-state > * { position: relative; z-index: 1; }
+.empty-state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--seppeverbeke-lavender-100);
+  color: var(--seppeverbeke-lavender-700);
+  margin-bottom: var(--seppeverbeke-space-4);
+}
+.empty-state-icon svg { width: 32px; height: 32px; }
+.empty-state-title {
+  font-family: var(--seppeverbeke-font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--seppeverbeke-ink-900);
+  margin-bottom: var(--seppeverbeke-space-2);
+}
+.empty-state p:last-child { max-width: 420px; margin-inline: auto; }
 
 /* Signature interaction #2: scroll-reveal */
 .reveal {
