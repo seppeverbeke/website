@@ -313,10 +313,80 @@ p { margin: 0; }
   padding-block: var(--seppeverbeke-space-8) var(--section-padding);
 }
 
+.hero-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 1200px) {
+  .hero-grid {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+    gap: var(--seppeverbeke-space-5);
+  }
+}
+
 .hero-inner {
   position: relative;
   z-index: 1;
   max-width: 720px;
+}
+
+.hero-logos { display: none; }
+@media (min-width: 1200px) {
+  .hero-logos {
+    display: block;
+    position: relative;
+    min-height: 560px;
+  }
+}
+
+.hero-logo-chip {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--seppeverbeke-space-3);
+  background: var(--seppeverbeke-surface);
+  border: 1px solid var(--seppeverbeke-line);
+  border-radius: var(--seppeverbeke-radius-pill);
+  padding: 14px 22px;
+  box-shadow: var(--seppeverbeke-shadow-card);
+  font-family: var(--seppeverbeke-font-mono);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--seppeverbeke-ink-900);
+  white-space: nowrap;
+  scale: 1;
+  animation: hero-logo-float 6s ease-in-out infinite;
+  transition: scale var(--seppeverbeke-transition), box-shadow var(--seppeverbeke-transition);
+}
+.hero-logo-chip:hover {
+  animation-play-state: paused;
+  scale: 1.12;
+  box-shadow: 0 10px 26px rgba(20, 21, 26, 0.14);
+  z-index: 2;
+}
+.hero-logo-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.hero-logo-chip--claude         { top: 0px;   right: 40px;  animation-delay: 0s; }
+.hero-logo-chip--chatgpt        { top: 70px;  right: -20px; animation-delay: 1.2s; }
+.hero-logo-chip--zapier         { top: 140px; right: 110px; animation-delay: 0.6s; }
+.hero-logo-chip--n8n            { top: 210px; right: -10px; animation-delay: 1.8s; }
+.hero-logo-chip--microsoft      { top: 280px; right: 80px;  animation-delay: 0.3s; }
+.hero-logo-chip--odoo           { top: 350px; right: -20px; animation-delay: 1.5s; }
+.hero-logo-chip--power-automate { top: 420px; right: 90px;  animation-delay: 2.1s; }
+.hero-logo-chip--plaud          { top: 490px; right: 0px;   animation-delay: 2.4s; }
+@keyframes hero-logo-float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -10px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-logo-chip { animation: none; }
 }
 
 .hero-blob {
