@@ -471,22 +471,58 @@ p { margin: 0; }
   .tile-grid--4 { grid-template-columns: repeat(4, 1fr); }
 }
 
-/* Bento variant: variable tile sizes, same radius/border language as .card */
+/* Bento variant: variable tile sizes *and* shapes, same radius/border
+   language as .card. A 6-column canvas with hand-tuned, explicitly pinned
+   positions (grid-*-start) so the mosaic tiles perfectly with zero gaps —
+   `dense` auto-placement alone can't guarantee that once spans vary in
+   both directions. Shape classes only set size (grid-*-end: span N), so
+   the moment the portfolio filter hides a card (.is-filtered-out), the
+   :has() check below disables all pins and the grid falls back to plain
+   `dense` auto-placement, letting the remaining cards reflow. */
 @media (min-width: 992px) {
   .tile-grid--bento {
     grid-template-columns: repeat(6, 1fr);
+    grid-auto-rows: minmax(190px, auto);
     grid-auto-flow: dense;
   }
-  .tile-grid--bento .card--bento-lg { grid-column: span 4; padding: var(--seppeverbeke-space-6); }
-  .tile-grid--bento .card--bento-md { grid-column: span 3; }
-  .tile-grid--bento .card--bento-sm { grid-column: span 2; }
+  /* Large — the two flagship cases (strong numbers / strong visual) */
+  .tile-grid--bento .card--bento-hero {
+    grid-column-end: span 4;
+    grid-row-end: span 2;
+    padding: var(--seppeverbeke-space-6);
+  }
+  .tile-grid--bento .card--bento-vertical {
+    grid-column-end: span 2;
+    grid-row-end: span 3;
+    padding: var(--seppeverbeke-space-6);
+  }
+  /* Medium — square and wide/low variants */
+  .tile-grid--bento .card--bento-square { grid-column-end: span 2; grid-row-end: span 2; }
+  .tile-grid--bento .card--bento-band { grid-column-end: span 4; grid-row-end: span 1; }
+  /* Small — compact/older projects */
+  .tile-grid--bento .card--bento-compact { grid-column-end: span 2; grid-row-end: span 1; }
+  /* "Deze website" — unchanged, stays a narrow horizontal strip at the bottom */
   .tile-grid--bento .card--bento-wide {
-    grid-column: span 6;
+    grid-column-end: span 6;
     flex-direction: row;
     align-items: center;
     gap: var(--seppeverbeke-space-5);
   }
-  .tile-grid--bento .card--bento-lg h3 { font-size: 26px; }
+  .tile-grid--bento .card--bento-hero h3 { font-size: 26px; }
+
+  /* Explicit, hand-tuned positions — only active while every card is
+     visible. Guarantees a gap-free mosaic in the default ("all") view. */
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(1) { grid-column-start: 1; grid-row-start: 1; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(2) { grid-column-start: 3; grid-row-start: 4; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(3) { grid-column-start: 1; grid-row-start: 3; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(4) { grid-column-start: 5; grid-row-start: 5; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(5) { grid-column-start: 5; grid-row-start: 1; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(6) { grid-column-start: 3; grid-row-start: 3; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(7) { grid-column-start: 5; grid-row-start: 4; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(8) { grid-column-start: 1; grid-row-start: 5; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(9) { grid-column-start: 1; grid-row-start: 6; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(10) { grid-column-start: 5; grid-row-start: 6; }
+  #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(11) { grid-column-start: 1; grid-row-start: 7; }
 }
 .card-bento-wide-body {
   display: flex;
