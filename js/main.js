@@ -225,6 +225,8 @@ if (contactForm) {
   let stopTimer = null;
   let correctionFrame = null;
   let correcting = false;
+  let lastScrollY = window.scrollY;
+  let scrollDirection = null; // 'down' | 'up' | null — the visitor's most recent real scroll input
 
   const easeSlow = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
@@ -237,9 +239,16 @@ if (contactForm) {
       correcting = false;
       document.documentElement.classList.remove('js-soft-scroll-correcting');
     }
+    // Resync so the next real scroll event measures direction from where the
+    // page actually ended up, not from before the correction ran.
+    lastScrollY = window.scrollY;
   };
 
   const findCorrectionTarget = () => {
+    // Only ever correct further in the direction the visitor was already
+    // scrolling — scrolling down should never snap back upward, and vice versa.
+    if (!scrollDirection) return null;
+
     const viewportH = window.innerHeight;
     const scrollY = window.scrollY;
     let target = null;
@@ -251,17 +260,23 @@ if (contactForm) {
       const sectionBottom = sectionTop + rect.height;
       const zone = rect.height * BOUNDARY_ZONE;
 
-      // Just scrolled past this section's top edge: nudge back up to align it
-      const distFromTop = scrollY - sectionTop;
-      if (distFromTop >= 0 && distFromTop <= zone && distFromTop < minDist) {
-        minDist = distFromTop;
-        target = sectionTop;
+      // Just scrolled past this section's top edge: nudge back up to align it.
+      // Only valid while the visitor was scrolling up (target is above scrollY).
+      if (scrollDirection === 'up') {
+        const distFromTop = scrollY - sectionTop;
+        if (distFromTop >= 0 && distFromTop <= zone && distFromTop < minDist) {
+          minDist = distFromTop;
+          target = sectionTop;
+        }
       }
-      // About to leave this section at the bottom: nudge forward to the next
-      const distFromBottom = sectionBottom - (scrollY + viewportH);
-      if (distFromBottom >= 0 && distFromBottom <= zone && distFromBottom < minDist) {
-        minDist = distFromBottom;
-        target = sectionBottom;
+      // About to leave this section at the bottom: nudge forward to the next.
+      // Only valid while the visitor was scrolling down (target is below scrollY).
+      if (scrollDirection === 'down') {
+        const distFromBottom = sectionBottom - (scrollY + viewportH);
+        if (distFromBottom >= 0 && distFromBottom <= zone && distFromBottom < minDist) {
+          minDist = distFromBottom;
+          target = sectionBottom;
+        }
       }
     });
 
@@ -284,6 +299,9 @@ if (contactForm) {
       } else {
         correcting = false;
         document.documentElement.classList.remove('js-soft-scroll-correcting');
+        // Resync so the next real scroll event measures direction from where
+        // the page actually ended up, not from before the correction ran.
+        lastScrollY = window.scrollY;
       }
     };
     correctionFrame = requestAnimationFrame(step);
@@ -312,6 +330,10 @@ if (contactForm) {
       // Ignore scroll events fired by our own correction — only react to the
       // visitor's own scrolling for the "has it fully stopped?" debounce.
       if (correcting) return;
+      const newY = window.scrollY;
+      if (newY > lastScrollY) scrollDirection = 'down';
+      else if (newY < lastScrollY) scrollDirection = 'up';
+      lastScrollY = newY;
       if (stopTimer) clearTimeout(stopTimer);
       stopTimer = setTimeout(maybeCorrect, STOP_DEBOUNCE_MS);
     },
