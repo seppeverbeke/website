@@ -91,18 +91,27 @@ if (portfolioGrid) {
   const cards = Array.from(portfolioGrid.querySelectorAll('.card'));
   const totalCount = cards.length;
 
+  const FADE_OUT_MS = 220;
+
   const applyFilter = (filter) => {
     let visible = 0;
     cards.forEach((card) => {
       const isMatch = filter === 'all' || card.dataset.category === filter;
       if (isMatch) {
         card.classList.remove('is-filtered-out');
+        card.classList.remove('is-fading-out');
         card.classList.remove('card-enter');
         void card.offsetWidth; // restart the fade-in animation
         card.classList.add('card-enter');
         visible += 1;
-      } else {
-        card.classList.add('is-filtered-out');
+      } else if (!card.classList.contains('is-filtered-out')) {
+        // Fade out subtly first, only remove from layout flow once the transition finishes
+        card.classList.add('is-fading-out');
+        window.setTimeout(() => {
+          if (card.classList.contains('is-fading-out')) {
+            card.classList.add('is-filtered-out');
+          }
+        }, FADE_OUT_MS);
       }
     });
     if (filterCount) {
@@ -134,6 +143,20 @@ if (portfolioGrid) {
 // Footer year
 const yearEl = document.getElementById('year');
 if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+// Live email validation (teaching micro-interaction): lights up green with a
+// checkmark as soon as a valid address is typed, before the form is submitted
+const emailField = document.getElementById('email-field');
+const emailInput = document.getElementById('email');
+if (emailField && emailInput) {
+  const validateEmail = () => {
+    const isValid = emailInput.value.trim() !== '' && emailInput.validity.valid;
+    emailField.classList.toggle('form-field--valid', isValid);
+  };
+  emailInput.addEventListener('input', validateEmail);
+  emailInput.addEventListener('blur', validateEmail);
+  validateEmail();
+}
 
 // Contact form: submit via AJAX so we can show an inline success message
 // instead of redirecting to Netlify's default thank-you page
@@ -169,3 +192,189 @@ if (contactForm) {
       });
   });
 }
+
+// ==========================================================================
+// Guided scroll — desktop-only, JS-driven soft correction (signature detail).
+// Deliberately NOT a CSS scroll-snap: a hard snap reads as a shove. Instead,
+// once the visitor has fully stopped scrolling near a section boundary
+// (last ~15-20% of the section), we nudge the page gently into place with a
+// slow ease-out. Any renewed scroll input aborts the nudge instantly.
+// ==========================================================================
+(function initGuidedScroll() {
+  const desktopMedia = window.matchMedia('(min-width: 1024px)');
+  const reducedMotionMedia = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (!desktopMedia.matches || reducedMotionMedia.matches) return;
+
+  const EXCLUDE_SELECTOR =
+    '.section:has(#portfolio-grid), .section:has(.case-body), .section:has(.blog-list)';
+  const STOP_DEBOUNCE_MS = 180;
+  const CORRECTION_MS = 520;
+  const BOUNDARY_ZONE = 0.18; // last/first 18% of a section's height
+
+  let sections;
+  try {
+    sections = Array.from(document.querySelectorAll('.hero, .section')).filter(
+      (el) => !el.matches(EXCLUDE_SELECTOR)
+    );
+  } catch (err) {
+    // :has() unsupported in this browser — skip the enhancement entirely
+    return;
+  }
+  if (sections.length < 2) return;
+
+  let stopTimer = null;
+  let correctionFrame = null;
+  let correcting = false;
+
+  const easeSlow = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+  const cancelCorrection = () => {
+    if (correctionFrame) {
+      cancelAnimationFrame(correctionFrame);
+      correctionFrame = null;
+    }
+    if (correcting) {
+      correcting = false;
+      document.documentElement.classList.remove('js-soft-scroll-correcting');
+    }
+  };
+
+  const findCorrectionTarget = () => {
+    const viewportH = window.innerHeight;
+    const scrollY = window.scrollY;
+    let target = null;
+    let minDist = Infinity;
+
+    sections.forEach((section) => {
+      const rect = section.getBoundingClientRect();
+      const sectionTop = rect.top + scrollY;
+      const sectionBottom = sectionTop + rect.height;
+      const zone = rect.height * BOUNDARY_ZONE;
+
+      // Just scrolled past this section's top edge: nudge back up to align it
+      const distFromTop = scrollY - sectionTop;
+      if (distFromTop >= 0 && distFromTop <= zone && distFromTop < minDist) {
+        minDist = distFromTop;
+        target = sectionTop;
+      }
+      // About to leave this section at the bottom: nudge forward to the next
+      const distFromBottom = sectionBottom - (scrollY + viewportH);
+      if (distFromBottom >= 0 && distFromBottom <= zone && distFromBottom < minDist) {
+        minDist = distFromBottom;
+        target = sectionBottom;
+      }
+    });
+
+    return target;
+  };
+
+  const runCorrection = (target) => {
+    correcting = true;
+    document.documentElement.classList.add('js-soft-scroll-correcting');
+    const startY = window.scrollY;
+    const distance = target - startY;
+    const start = performance.now();
+
+    const step = (now) => {
+      if (!correcting) return;
+      const progress = Math.min((now - start) / CORRECTION_MS, 1);
+      window.scrollTo(0, startY + distance * easeSlow(progress));
+      if (progress < 1) {
+        correctionFrame = requestAnimationFrame(step);
+      } else {
+        correcting = false;
+        document.documentElement.classList.remove('js-soft-scroll-correcting');
+      }
+    };
+    correctionFrame = requestAnimationFrame(step);
+  };
+
+  const maybeCorrect = () => {
+    const target = findCorrectionTarget();
+    if (target === null || Math.abs(target - window.scrollY) < 2) return;
+    runCorrection(target);
+  };
+
+  // Any genuine user scroll input aborts an in-progress correction instantly
+  const abortIfCorrecting = () => {
+    if (correcting) cancelCorrection();
+  };
+  window.addEventListener('wheel', abortIfCorrecting, { passive: true });
+  window.addEventListener('touchmove', abortIfCorrecting, { passive: true });
+  window.addEventListener('keydown', (event) => {
+    const navKeys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
+    if (navKeys.includes(event.key)) abortIfCorrecting();
+  });
+
+  window.addEventListener(
+    'scroll',
+    () => {
+      // Ignore scroll events fired by our own correction — only react to the
+      // visitor's own scrolling for the "has it fully stopped?" debounce.
+      if (correcting) return;
+      if (stopTimer) clearTimeout(stopTimer);
+      stopTimer = setTimeout(maybeCorrect, STOP_DEBOUNCE_MS);
+    },
+    { passive: true }
+  );
+})();
+
+// ==========================================================================
+// Guided scroll-indicator (signature detail #5) — a vertical column of
+// section dots, desktop-only. Active dot fills in, hover reveals the
+// section name, click smooth-scrolls there.
+// ==========================================================================
+(function initScrollIndicator() {
+  if (!window.matchMedia('(min-width: 1024px)').matches) return;
+
+  const sections = Array.from(document.querySelectorAll('main .hero, main .section'));
+  if (sections.length < 2) return;
+
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const nav = document.createElement('nav');
+  nav.className = 'scroll-indicator';
+  nav.setAttribute('aria-label', 'Sectienavigatie');
+
+  const dots = sections.map((section, index) => {
+    if (!section.id) section.id = `scroll-section-${index}`;
+
+    const heading = section.querySelector('h1, h2');
+    const eyebrow = section.querySelector('.eyebrow');
+    const label = (heading || eyebrow) ? (heading || eyebrow).textContent.trim() : `Sectie ${index + 1}`;
+
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.className = 'scroll-indicator-dot';
+    dot.setAttribute('aria-label', label);
+
+    const labelEl = document.createElement('span');
+    labelEl.className = 'scroll-indicator-label';
+    labelEl.textContent = label;
+    dot.appendChild(labelEl);
+
+    dot.addEventListener('click', () => {
+      section.scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+
+    nav.appendChild(dot);
+    return dot;
+  });
+
+  document.body.appendChild(nav);
+
+  if ('IntersectionObserver' in window) {
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const index = sections.indexOf(entry.target);
+          if (index === -1 || !entry.isIntersecting) return;
+          dots.forEach((dot) => dot.classList.remove('is-active'));
+          dots[index].classList.add('is-active');
+        });
+      },
+      { threshold: 0.5 }
+    );
+    sections.forEach((section) => sectionObserver.observe(section));
+  }
+})();
