@@ -1321,7 +1321,7 @@ html.js-soft-scroll-correcting {
     align-items: center;
     gap: 14px;
     position: fixed;
-    right: var(--seppeverbeke-space-4);
+    left: var(--seppeverbeke-space-4);
     top: 50%;
     transform: translateY(-50%);
     z-index: 40;
@@ -1331,7 +1331,7 @@ html.js-soft-scroll-correcting {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: flex-start;
   width: 24px;
   height: 24px;
   padding: 0;
@@ -1355,7 +1355,7 @@ html.js-soft-scroll-correcting {
 }
 .scroll-indicator-label {
   position: absolute;
-  right: 20px;
+  left: 20px;
   white-space: nowrap;
   font-family: var(--seppeverbeke-font-mono);
   font-size: 11px;
@@ -1365,7 +1365,7 @@ html.js-soft-scroll-correcting {
   border-radius: var(--seppeverbeke-radius-pill);
   border: 1px solid var(--seppeverbeke-line);
   opacity: 0;
-  transform: translateX(4px);
+  transform: translateX(-4px);
   pointer-events: none;
   transition: opacity 180ms ease-out, transform 180ms ease-out;
 }
