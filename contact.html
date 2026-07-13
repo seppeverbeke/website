@@ -49,15 +49,13 @@
   <main>
     <section class="section container">
       <div class="split reveal">
-        <div class="split-body split-body--sticky">
+        <div class="split-body">
           <span class="eyebrow">Contact</span>
           <h1>Vertel ons over jouw proces.</h1>
           <p class="lede">Korte omschrijving, geen verplichtingen. We antwoorden binnen 1 werkdag.</p>
           <span class="badge" style="margin-top: var(--seppeverbeke-space-3);">Gratis en vrijblijvend, ongeveer 1 uur</span>
-        </div>
 
-        <div class="split-body">
-          <form name="contact" id="contact-form" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+          <form name="contact" id="contact-form" method="POST" data-netlify="true" netlify-honeypot="bot-field" style="margin-top: var(--seppeverbeke-space-6);">
             <input type="hidden" name="form-name" value="contact">
             <p class="form-field" style="display:none;">
               <label>Laat dit veld leeg<input name="bot-field"></label>
@@ -91,8 +89,10 @@
             <h3>Verzonden!</h3>
             <p>Bedankt, je bericht is onderweg. We antwoorden binnen 1 werkdag, tot dan!</p>
           </div>
+        </div>
 
-          <div class="card" style="margin-top: var(--seppeverbeke-space-6);">
+        <div class="split-body split-body--sticky">
+          <div class="card">
             <span class="eyebrow">Rechtstreeks contact</span>
             <h3>Liever meteen een afspraak?</h3>
             <p>Mail naar <a href="mailto:seppeverbeke@hotmail.com" style="color:var(--seppeverbeke-lavender-700); font-weight:600;">seppeverbeke@hotmail.com</a> of plan zelf een intake in via de agenda-link die hier binnenkort staat.</p>
