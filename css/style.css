@@ -778,6 +778,15 @@ p { margin: 0; }
 @media (min-width: 992px) {
   .split { grid-template-columns: 1fr 1fr; gap: var(--seppeverbeke-space-8); }
   .split--reverse .split-media { order: 2; }
+  /* Contact page: the intro column sticks below the sticky header (72px)
+     and travels only as far as the taller form column — align-self: start
+     keeps its box sized to its own content instead of stretching to match
+     the row, which is what lets it "let go" once the form scrolls past. */
+  .split-body--sticky {
+    align-self: start;
+    position: sticky;
+    top: 72px;
+  }
 }
 .split-media {
   aspect-ratio: 4 / 3;
