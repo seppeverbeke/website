@@ -1202,3 +1202,26 @@ p { margin: 0; }
 .error-terminal-path { color: #FF8FA3; }
 .error-terminal-out { color: #A9A6C4; }
 .error-terminal-out a { color: #C9C4F5; text-decoration: underline; }
+
+/* ==========================================================================
+   Scroll snap (desktop only, subtle — proximity not mandatory)
+   ========================================================================== */
+@media (min-width: 992px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+  .hero,
+  .section {
+    scroll-snap-align: start;
+    scroll-snap-stop: normal;
+  }
+  /* Long / list-heavy sections opt out so a visitor never gets stuck mid-scroll */
+  .section:has(#portfolio-grid),
+  .section:has(.case-body),
+  .section:has(.blog-list) {
+    scroll-snap-align: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-snap-type: none; }
+}
