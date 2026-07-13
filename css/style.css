@@ -249,11 +249,6 @@ p { margin: 0; }
 .wordmark-dot {
   display: inline-block;
   color: var(--seppeverbeke-lavender-500);
-}
-/* The "breathing" dot is a footer-only signature detail — the header
-   wordmark stays static so the effect reads as a deliberate flourish
-   rather than a sitewide tic. */
-.site-footer .wordmark-dot {
   animation: dot-pulse 2.6s ease-in-out infinite;
 }
 @keyframes dot-pulse {
@@ -626,12 +621,12 @@ p { margin: 0; }
 .intake-panel-glow {
   position: absolute;
   z-index: 0;
-  top: -240px;
-  left: -240px;
-  width: 480px;
-  height: 480px;
+  top: -190px;
+  left: -190px;
+  width: 380px;
+  height: 380px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(138, 120, 201, 0.12) 0%, rgba(138, 120, 201, 0) 70%);
+  background: radial-gradient(circle, rgba(138, 120, 201, 0.16) 0%, rgba(138, 120, 201, 0) 70%);
   transform: translate3d(var(--glow-x, 50%), var(--glow-y, 50%), 0);
   transition: transform 200ms ease-out, opacity 220ms ease-out;
   opacity: 0;
