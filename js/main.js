@@ -350,3 +350,30 @@ if (contactForm) {
     sections.forEach((section) => sectionObserver.observe(section));
   }
 })();
+
+// Cursor-following glow — desktop-only, one-off detail on the homepage's
+// gratis-intake card. Not reused anywhere else on the site.
+(function initIntakeGlow() {
+  const card = document.querySelector('.intake-panel');
+  if (!card) return;
+
+  const media = window.matchMedia('(hover: hover) and (pointer: fine)');
+  if (!media.matches) return;
+
+  const glow = document.createElement('div');
+  glow.className = 'intake-panel-glow';
+  glow.setAttribute('aria-hidden', 'true');
+  card.prepend(glow);
+
+  const rect = card.getBoundingClientRect();
+  glow.style.setProperty('--glow-x', `${rect.width / 2}px`);
+  glow.style.setProperty('--glow-y', `${rect.height / 2}px`);
+
+  card.addEventListener('pointermove', (event) => {
+    const cardRect = card.getBoundingClientRect();
+    glow.style.setProperty('--glow-x', `${event.clientX - cardRect.left}px`);
+    glow.style.setProperty('--glow-y', `${event.clientY - cardRect.top}px`);
+  });
+  card.addEventListener('pointerenter', () => glow.classList.add('is-visible'));
+  card.addEventListener('pointerleave', () => glow.classList.remove('is-visible'));
+})();
