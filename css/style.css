@@ -1299,10 +1299,11 @@ p { margin: 0; }
 .error-terminal-out a { color: #C9C4F5; text-decoration: underline; }
 
 /* ==========================================================================
-   Guided scroll (desktop only, JS-driven soft correction — see js/main.js)
+   Guided scroll (desktop only, JS-driven speed shaping — see js/main.js)
    No scroll-snap-type is used: a hard snap reads as a shove. Instead
-   js/main.js nudges the page toward the nearest section boundary only after
-   the visitor has fully stopped scrolling near the edge of a section.
+   js/main.js briefly slows down each wheel tick while the visitor is
+   actively crossing a section boundary. It only ever scales input the
+   visitor is already giving — it never scrolls on its own after they stop.
    ========================================================================== */
 html.js-soft-scroll-correcting {
   scroll-behavior: auto;

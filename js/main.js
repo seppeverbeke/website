@@ -194,11 +194,13 @@ if (contactForm) {
 }
 
 // ==========================================================================
-// Guided scroll — desktop-only, JS-driven soft correction (signature detail).
-// Deliberately NOT a CSS scroll-snap: a hard snap reads as a shove. Instead,
-// once the visitor has fully stopped scrolling near a section boundary
-// (last ~15-20% of the section), we nudge the page gently into place with a
-// slow ease-out. Any renewed scroll input aborts the nudge instantly.
+// Guided scroll — desktop-only, JS-driven speed shaping (signature detail).
+// Deliberately NOT a scroll-snap and NOT a post-stop nudge: the page must
+// never move on its own after the visitor lets go. Instead, while the
+// visitor is actively scrolling (wheel/trackpad), crossing a section
+// boundary feels slightly "heavier" — each wheel tick is scaled down as it
+// nears the edge — so transitions read as guided rather than abrupt. The
+// moment input stops, motion stops; nothing here ever schedules a scroll.
 // ==========================================================================
 (function initGuidedScroll() {
   const desktopMedia = window.matchMedia('(min-width: 1024px)');
@@ -207,9 +209,9 @@ if (contactForm) {
 
   const EXCLUDE_SELECTOR =
     '.section:has(#portfolio-grid), .section:has(.case-body), .section:has(.blog-list)';
-  const STOP_DEBOUNCE_MS = 180;
-  const CORRECTION_MS = 520;
   const BOUNDARY_ZONE = 0.18; // last/first 18% of a section's height
+  const MIN_SPEED_FACTOR = 0.35; // slowest speed right at the boundary line
+  const RESTORE_MS = 140; // idle gap before we hand scroll-behavior back to CSS
 
   let sections;
   try {
@@ -222,37 +224,23 @@ if (contactForm) {
   }
   if (sections.length < 2) return;
 
-  let stopTimer = null;
-  let correctionFrame = null;
-  let correcting = false;
-  let lastScrollY = window.scrollY;
-  let scrollDirection = null; // 'down' | 'up' | null — the visitor's most recent real scroll input
+  let restoreTimer = null;
 
-  const easeSlow = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-
-  const cancelCorrection = () => {
-    if (correctionFrame) {
-      cancelAnimationFrame(correctionFrame);
-      correctionFrame = null;
-    }
-    if (correcting) {
-      correcting = false;
-      document.documentElement.classList.remove('js-soft-scroll-correcting');
-    }
-    // Resync so the next real scroll event measures direction from where the
-    // page actually ended up, not from before the correction ran.
-    lastScrollY = window.scrollY;
+  // Wheel deltas aren't always in pixels — convert line/page units so the
+  // manual scrollBy below tracks native scroll speed closely.
+  const deltaToPixels = (event) => {
+    if (event.deltaMode === 1) return event.deltaY * 16; // DOM_DELTA_LINE
+    if (event.deltaMode === 2) return event.deltaY * window.innerHeight; // DOM_DELTA_PAGE
+    return event.deltaY; // DOM_DELTA_PIXEL
   };
 
-  const findCorrectionTarget = () => {
-    // Only ever correct further in the direction the visitor was already
-    // scrolling — scrolling down should never snap back upward, and vice versa.
-    if (!scrollDirection) return null;
-
+  // 1 = full native speed. Drops toward MIN_SPEED_FACTOR only while inside
+  // the boundary zone AND only in the direction the visitor is heading —
+  // scrolling down never gets slowed by a boundary above, and vice versa.
+  const speedFactorFor = (direction) => {
     const viewportH = window.innerHeight;
     const scrollY = window.scrollY;
-    let target = null;
-    let minDist = Infinity;
+    let factor = 1;
 
     sections.forEach((section) => {
       const rect = section.getBoundingClientRect();
@@ -260,84 +248,46 @@ if (contactForm) {
       const sectionBottom = sectionTop + rect.height;
       const zone = rect.height * BOUNDARY_ZONE;
 
-      // Just scrolled past this section's top edge: nudge back up to align it.
-      // Only valid while the visitor was scrolling up (target is above scrollY).
-      if (scrollDirection === 'up') {
-        const distFromTop = scrollY - sectionTop;
-        if (distFromTop >= 0 && distFromTop <= zone && distFromTop < minDist) {
-          minDist = distFromTop;
-          target = sectionTop;
-        }
-      }
-      // About to leave this section at the bottom: nudge forward to the next.
-      // Only valid while the visitor was scrolling down (target is below scrollY).
-      if (scrollDirection === 'down') {
+      if (direction === 'down') {
         const distFromBottom = sectionBottom - (scrollY + viewportH);
-        if (distFromBottom >= 0 && distFromBottom <= zone && distFromBottom < minDist) {
-          minDist = distFromBottom;
-          target = sectionBottom;
+        if (distFromBottom >= 0 && distFromBottom <= zone) {
+          const progress = 1 - distFromBottom / zone;
+          factor = Math.min(factor, 1 - progress * (1 - MIN_SPEED_FACTOR));
+        }
+      } else if (direction === 'up') {
+        const distFromTop = scrollY - sectionTop;
+        if (distFromTop >= 0 && distFromTop <= zone) {
+          const progress = 1 - distFromTop / zone;
+          factor = Math.min(factor, 1 - progress * (1 - MIN_SPEED_FACTOR));
         }
       }
     });
 
-    return target;
+    return factor;
   };
-
-  const runCorrection = (target) => {
-    correcting = true;
-    document.documentElement.classList.add('js-soft-scroll-correcting');
-    const startY = window.scrollY;
-    const distance = target - startY;
-    const start = performance.now();
-
-    const step = (now) => {
-      if (!correcting) return;
-      const progress = Math.min((now - start) / CORRECTION_MS, 1);
-      window.scrollTo(0, startY + distance * easeSlow(progress));
-      if (progress < 1) {
-        correctionFrame = requestAnimationFrame(step);
-      } else {
-        correcting = false;
-        document.documentElement.classList.remove('js-soft-scroll-correcting');
-        // Resync so the next real scroll event measures direction from where
-        // the page actually ended up, not from before the correction ran.
-        lastScrollY = window.scrollY;
-      }
-    };
-    correctionFrame = requestAnimationFrame(step);
-  };
-
-  const maybeCorrect = () => {
-    const target = findCorrectionTarget();
-    if (target === null || Math.abs(target - window.scrollY) < 2) return;
-    runCorrection(target);
-  };
-
-  // Any genuine user scroll input aborts an in-progress correction instantly
-  const abortIfCorrecting = () => {
-    if (correcting) cancelCorrection();
-  };
-  window.addEventListener('wheel', abortIfCorrecting, { passive: true });
-  window.addEventListener('touchmove', abortIfCorrecting, { passive: true });
-  window.addEventListener('keydown', (event) => {
-    const navKeys = ['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '];
-    if (navKeys.includes(event.key)) abortIfCorrecting();
-  });
 
   window.addEventListener(
-    'scroll',
-    () => {
-      // Ignore scroll events fired by our own correction — only react to the
-      // visitor's own scrolling for the "has it fully stopped?" debounce.
-      if (correcting) return;
-      const newY = window.scrollY;
-      if (newY > lastScrollY) scrollDirection = 'down';
-      else if (newY < lastScrollY) scrollDirection = 'up';
-      lastScrollY = newY;
-      if (stopTimer) clearTimeout(stopTimer);
-      stopTimer = setTimeout(maybeCorrect, STOP_DEBOUNCE_MS);
+    'wheel',
+    (event) => {
+      if (event.ctrlKey) return; // pinch-zoom gesture — leave untouched
+      const direction = event.deltaY > 0 ? 'down' : event.deltaY < 0 ? 'up' : null;
+      if (!direction) return;
+
+      const factor = speedFactorFor(direction);
+      if (factor >= 1) return; // outside any boundary zone — full native speed
+
+      // Scale down *this* tick only. No animation, no timer-driven motion —
+      // the page moves exactly as much as this single input event asks for.
+      event.preventDefault();
+      document.documentElement.classList.add('js-soft-scroll-correcting');
+      window.scrollBy(0, deltaToPixels(event) * factor);
+
+      if (restoreTimer) clearTimeout(restoreTimer);
+      restoreTimer = setTimeout(() => {
+        document.documentElement.classList.remove('js-soft-scroll-correcting');
+      }, RESTORE_MS);
     },
-    { passive: true }
+    { passive: false }
   );
 })();
 
