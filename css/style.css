@@ -1201,7 +1201,8 @@ p { margin: 0; }
   font-size: 14px;
   line-height: 1;
 }
-.footer-cta-actions .footer-availability { font-size: 12px; }
+.footer-cta-actions .footer-availability { gap: 6px; font-size: 11px; }
+.footer-cta-actions .footer-availability-dot { width: 6px; height: 6px; }
 .footer-availability-dot {
   display: inline-block;
   width: 8px;
@@ -1277,7 +1278,6 @@ p { margin: 0; }
   color: var(--seppeverbeke-lavender-100);
   white-space: nowrap;
 }
-.footer-signature-text .wordmark-dot { color: #F5F2FC; }
 
 @media (min-width: 768px) {
   .footer-cta-card { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--seppeverbeke-space-5); }
