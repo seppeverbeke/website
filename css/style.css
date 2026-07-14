@@ -1272,7 +1272,7 @@ p { margin: 0; }
   display: inline-block;
   font-family: var(--seppeverbeke-font-display);
   font-weight: 900;
-  font-size: clamp(48px, 13vw, 168px);
+  font-size: clamp(40px, 11vw, 138px);
   line-height: 1;
   letter-spacing: -0.03em;
   color: var(--seppeverbeke-lavender-100);
