@@ -89,14 +89,14 @@ if (portfolioGrid) {
   const filterCount = document.getElementById('filter-count');
   const emptyState = document.getElementById('portfolio-empty');
   const cards = Array.from(portfolioGrid.querySelectorAll('.card'));
-  const totalCount = cards.length;
 
   const FADE_OUT_MS = 220;
+  let activeFilter = 'all';
 
-  const applyFilter = (filter) => {
+  const applyFilters = () => {
     let visible = 0;
     cards.forEach((card) => {
-      const isMatch = filter === 'all' || card.dataset.category === filter;
+      const isMatch = activeFilter === 'all' || card.dataset.category === activeFilter;
       if (isMatch) {
         card.classList.remove('is-filtered-out');
         card.classList.remove('is-fading-out');
@@ -116,8 +116,23 @@ if (portfolioGrid) {
     });
     if (filterCount) {
       filterCount.textContent =
-        filter === 'all' ? `${totalCount} projecten` : `${visible} van ${totalCount} projecten`;
+        activeFilter === 'all' ? `${cards.length} projecten` : `${visible} van ${cards.length} projecten`;
     }
+    if (emptyState) emptyState.hidden = visible !== 0;
+  };
+
+  // Initial paint: set visibility directly, no fade animation on load
+  const setInitialVisibility = () => {
+    let visible = 0;
+    cards.forEach((card) => {
+      const isMatch = activeFilter === 'all' || card.dataset.category === activeFilter;
+      if (isMatch) {
+        visible += 1;
+      } else {
+        card.classList.add('is-filtered-out');
+      }
+    });
+    if (filterCount) filterCount.textContent = `${cards.length} projecten`;
     if (emptyState) emptyState.hidden = visible !== 0;
   };
 
@@ -132,12 +147,13 @@ if (portfolioGrid) {
         });
         pill.classList.add('is-active');
         pill.setAttribute('aria-pressed', 'true');
-        applyFilter(pill.dataset.filter);
+        activeFilter = pill.dataset.filter;
+        applyFilters();
       });
     });
   }
 
-  if (filterCount) filterCount.textContent = `${totalCount} projecten`;
+  setInitialVisibility();
 }
 
 // Footer year

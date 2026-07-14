@@ -1287,6 +1287,108 @@ p { margin: 0; }
 }
 
 /* ==========================================================================
+   Portfolio case detail template
+   ========================================================================== */
+
+/* Header — kerncijfer as a visual statement right under the title */
+.case-headline-stat {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: var(--seppeverbeke-space-3);
+  row-gap: var(--seppeverbeke-space-1);
+  margin-top: var(--seppeverbeke-space-4);
+}
+.case-headline-stat-number {
+  font-family: var(--seppeverbeke-font-mono);
+  font-weight: 500;
+  font-size: 28px;
+  color: var(--seppeverbeke-lavender-700);
+}
+@media (min-width: 576px) {
+  .case-headline-stat-number { font-size: 34px; }
+}
+.case-headline-stat-context {
+  color: var(--seppeverbeke-ink-500);
+  font-size: 15px;
+}
+
+/* Visual proof — thin-border browser mockup, with a placeholder state for
+   cases that don't have a screenshot yet. The placeholder keeps the exact
+   same frame/dimensions so the layout won't shift once an image is added. */
+.browser-mockup {
+  margin-top: var(--seppeverbeke-space-6);
+  background: var(--seppeverbeke-surface);
+  border: 1px solid var(--seppeverbeke-line);
+  border-radius: var(--seppeverbeke-radius-card);
+  overflow: hidden;
+}
+.browser-mockup-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--seppeverbeke-line);
+}
+.browser-mockup-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--seppeverbeke-line);
+}
+.browser-mockup-body {
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+}
+.browser-mockup-body img { width: 100%; height: 100%; object-fit: cover; }
+.browser-mockup-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--seppeverbeke-lavender-100);
+  color: var(--seppeverbeke-lavender-700);
+  font-family: var(--seppeverbeke-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Doorlopend verhaal — thin vertical line + mono phase label per paragraph,
+   reusing the site's existing line color/style (same as .footer-divider /
+   .signal-list dividers) and the mono/Lavender-300 language of .step-number,
+   rather than inventing a new visual element. */
+.case-phases {
+  display: flex;
+  flex-direction: column;
+  gap: var(--seppeverbeke-space-5);
+  max-width: 680px;
+  padding-left: var(--seppeverbeke-space-5);
+  border-left: 1px solid var(--seppeverbeke-line);
+}
+.case-phase-label {
+  display: block;
+  font-family: var(--seppeverbeke-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--seppeverbeke-lavender-300);
+  margin-bottom: var(--seppeverbeke-space-2);
+}
+.case-phase p { color: var(--seppeverbeke-ink-900); }
+
+/* Result stat blocks — same .stat-cards/.stat-card structure as elsewhere,
+   with the number set in JetBrains Mono for this repeated, data-forward
+   block specifically. */
+.stat-cards--mono .stat-number {
+  font-family: var(--seppeverbeke-font-mono);
+  font-weight: 500;
+}
+
+/* ==========================================================================
    Utilities
    ========================================================================== */
 .badge {
