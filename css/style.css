@@ -1161,9 +1161,9 @@ p { margin: 0; }
 /* Single shared container: every row below (including the CTA card) is a
    direct child, so their left/right edges always line up exactly. */
 .footer-shell {
-  max-width: 960px;
+  max-width: 1200px;
   margin-inline: auto;
-  padding-inline: 24px;
+  padding-inline: var(--container-padding);
 }
 
 /* Row 1 — CTA card */
@@ -1270,8 +1270,8 @@ p { margin: 0; }
 .footer-signature-text {
   display: inline-block;
   font-family: var(--seppeverbeke-font-display);
-  font-weight: 700;
-  font-size: clamp(32px, 10vw, 56px);
+  font-weight: 900;
+  font-size: clamp(48px, 13vw, 168px);
   line-height: 1;
   letter-spacing: -0.03em;
   color: var(--seppeverbeke-lavender-100);
