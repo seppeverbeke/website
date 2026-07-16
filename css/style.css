@@ -1314,6 +1314,13 @@ p { margin: 0; }
   overflow: hidden;
 }
 .browser-mockup-body img { width: 100%; height: 100%; object-fit: cover; }
+/* Modifier for screenshots that are naturally wide/flat (e.g. a single
+   wizard-step UI panel) instead of a full app viewport — keeps the same
+   frame/bar/dots, just a shorter body so the source image isn't cropped
+   into its own content. */
+.browser-mockup-body--wide {
+  aspect-ratio: 3 / 1;
+}
 .browser-mockup-placeholder {
   width: 100%;
   height: 100%;
