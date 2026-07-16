@@ -1,16 +1,56 @@
-// Mobile nav toggle
+// Mobile nav — full-screen overlay
 const navToggle = document.getElementById('nav-toggle');
-const siteNav = document.getElementById('site-nav');
-if (navToggle && siteNav) {
-  navToggle.addEventListener('click', () => {
-    const isOpen = siteNav.classList.toggle('is-open');
-    navToggle.setAttribute('aria-expanded', String(isOpen));
-  });
-  siteNav.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      siteNav.classList.remove('is-open');
-      navToggle.setAttribute('aria-expanded', 'false');
+const mobileNav = document.getElementById('mobile-nav');
+if (navToggle && mobileNav) {
+  const staggerTargets = Array.from(mobileNav.querySelectorAll('.mobile-nav-item, .mobile-nav-cta'));
+  // Same stagger timing as the portfolio filter fade+stagger swap (see
+  // STAGGER_MS below), so the two "items animate in one after another"
+  // moments on the site feel like the same motion language.
+  const STAGGER_MS = 90;
+  let closeTimer = null;
+
+  const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const openNav = () => {
+    if (closeTimer) {
+      window.clearTimeout(closeTimer);
+      closeTimer = null;
+    }
+    mobileNav.classList.remove('is-closing');
+    mobileNav.classList.add('is-open');
+    navToggle.setAttribute('aria-expanded', 'true');
+    navToggle.setAttribute('aria-label', 'Menu sluiten');
+    document.body.classList.add('mobile-nav-open');
+    staggerTargets.forEach((el, i) => {
+      el.style.transitionDelay = reducedMotion() ? '0ms' : `${i * STAGGER_MS}ms`;
     });
+  };
+
+  const closeNav = () => {
+    if (!mobileNav.classList.contains('is-open')) return;
+    mobileNav.classList.remove('is-open');
+    mobileNav.classList.add('is-closing');
+    navToggle.setAttribute('aria-expanded', 'false');
+    navToggle.setAttribute('aria-label', 'Menu openen');
+    document.body.classList.remove('mobile-nav-open');
+    if (closeTimer) window.clearTimeout(closeTimer);
+    closeTimer = window.setTimeout(() => {
+      mobileNav.classList.remove('is-closing');
+      closeTimer = null;
+    }, 150);
+  };
+
+  navToggle.addEventListener('click', () => {
+    if (mobileNav.classList.contains('is-open')) closeNav();
+    else openNav();
+  });
+
+  mobileNav.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => closeNav());
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileNav.classList.contains('is-open')) closeNav();
   });
 }
 

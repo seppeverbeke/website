@@ -272,7 +272,11 @@ p { margin: 0; }
   font-size: 20px;
   letter-spacing: -0.02em;
   color: var(--seppeverbeke-ink-900);
+  cursor: pointer;
+  transition: color var(--seppeverbeke-transition);
 }
+.wordmark:hover,
+.wordmark:focus-visible { color: var(--seppeverbeke-lavender-700); }
 .wordmark-dot {
   display: inline-block;
   color: var(--seppeverbeke-lavender-500);
@@ -323,29 +327,116 @@ p { margin: 0; }
   height: 2px;
   background: var(--seppeverbeke-ink-900);
   border-radius: 2px;
-  transition: transform var(--seppeverbeke-transition), opacity var(--seppeverbeke-transition);
+  transition: transform 200ms ease-out, opacity 200ms ease-out;
 }
 .nav-toggle[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .nav-toggle[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
 .nav-toggle[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-.site-nav.is-open {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--seppeverbeke-space-4);
-  position: absolute;
-  top: 72px;
-  left: 0;
-  right: 0;
-  background: var(--seppeverbeke-surface);
-  border-bottom: 1px solid var(--seppeverbeke-line);
-  padding: var(--seppeverbeke-space-5) var(--container-padding);
-}
-
 @media (min-width: 992px) {
   .site-nav { display: flex; }
   .nav-toggle { display: none; }
+}
+
+/* Mobile nav — full-screen overlay (replaces the old dropdown-card menu).
+   Sits as a sibling of .site-header (not nested inside it) because
+   .site-header's backdrop-filter would otherwise establish a containing
+   block for this element's position: fixed, breaking full-viewport sizing.
+   The persistent sticky header bar above it already provides the "logo
+   left / close button right" top row (the nav-toggle morphs into the close
+   icon), so the panel itself only needs to hold the nav items + CTA. */
+.mobile-nav {
+  position: fixed;
+  top: 72px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 39;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--seppeverbeke-space-6);
+  background: var(--seppeverbeke-cloud);
+  padding: var(--seppeverbeke-space-6) var(--container-padding) var(--seppeverbeke-space-5);
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateY(-8px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 220ms ease-out, transform 220ms ease-out, visibility 0ms linear 220ms;
+}
+.mobile-nav::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(20, 21, 26, 0.06) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+.mobile-nav > * { position: relative; z-index: 1; }
+.mobile-nav.is-open {
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 220ms ease-out, transform 220ms ease-out, visibility 0ms linear 0ms;
+}
+.mobile-nav.is-closing {
+  transition: opacity 150ms ease-out, transform 150ms ease-out, visibility 0ms linear 150ms;
+}
+body.mobile-nav-open { overflow: hidden; }
+
+.mobile-nav-items {
+  display: flex;
+  flex-direction: column;
+}
+.mobile-nav-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--seppeverbeke-space-3);
+  padding-block: var(--seppeverbeke-space-4);
+  border-bottom: 1px solid var(--seppeverbeke-line);
+  font-family: var(--seppeverbeke-font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--seppeverbeke-ink-900);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 320ms ease-out, transform 320ms ease-out, color var(--seppeverbeke-transition);
+}
+@media (min-width: 380px) {
+  .mobile-nav-item { font-size: 24px; }
+}
+.mobile-nav-item-num {
+  font-family: var(--seppeverbeke-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--seppeverbeke-lavender-700);
+}
+.mobile-nav-item[aria-current="page"] { color: var(--seppeverbeke-lavender-700); }
+.mobile-nav.is-open .mobile-nav-item { opacity: 1; transform: translateY(0); }
+
+.mobile-nav-cta {
+  width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 320ms ease-out, transform 320ms ease-out, background var(--seppeverbeke-transition);
+}
+.mobile-nav.is-open .mobile-nav-cta { opacity: 1; transform: translateY(0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav,
+  .mobile-nav-item,
+  .mobile-nav-cta {
+    transition-duration: 150ms !important;
+    transition-delay: 0ms !important;
+    transform: none !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .mobile-nav { display: none; }
 }
 
 /* ==========================================================================
