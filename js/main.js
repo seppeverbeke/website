@@ -94,6 +94,7 @@ if (portfolioGrid) {
   let activeFilter = 'all';
 
   const applyFilters = () => {
+    portfolioGrid.classList.toggle('is-filtered', activeFilter !== 'all');
     let visible = 0;
     cards.forEach((card) => {
       const isMatch = activeFilter === 'all' || card.dataset.category === activeFilter;

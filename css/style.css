@@ -202,6 +202,19 @@ p { margin: 0; }
 
 .btn-sm { padding: 10px 20px; font-size: 14px; }
 
+/* Secondary action as a text link instead of a pill button — used wherever
+   a button would compete visually with the page's primary CTA. */
+.link-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--seppeverbeke-space-2);
+  color: var(--seppeverbeke-ink-900);
+  font-weight: 600;
+  font-size: 15px;
+  transition: transform var(--seppeverbeke-transition), color var(--seppeverbeke-transition);
+}
+.link-arrow:hover { transform: translateX(4px); color: var(--seppeverbeke-lavender-700); }
+
 /* ==========================================================================
    Header / Nav
    ========================================================================== */
@@ -503,6 +516,25 @@ p { margin: 0; }
   #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(9) { grid-column-start: 1; grid-row-start: 6; }
   #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(10) { grid-column-start: 5; grid-row-start: 6; }
   #portfolio-grid:not(:has(.is-filtered-out)) > a:nth-child(11) { grid-column-start: 1; grid-row-start: 7; }
+
+  /* Filtered view (a specific category, not "Alle"): the hand-tuned bento
+     ratios above only add up for the full curated set of 11 cases. For an
+     arbitrary subset they leave gaps and mismatched proportions, so fall
+     back to a plain, uniform grid with equal-size cards. */
+  #portfolio-grid.is-filtered {
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: auto;
+  }
+  #portfolio-grid.is-filtered .card {
+    grid-column-start: auto !important;
+    grid-row-start: auto !important;
+    grid-column-end: span 1 !important;
+    grid-row-end: span 1 !important;
+    flex-direction: column !important;
+    padding: var(--seppeverbeke-space-5) !important;
+  }
+  #portfolio-grid.is-filtered .card-bento-wide-body { gap: var(--seppeverbeke-space-3); }
+  #portfolio-grid.is-filtered .card--bento-hero h3 { font-size: inherit; }
 }
 .card-bento-wide-body {
   display: flex;
@@ -651,12 +683,6 @@ p { margin: 0; }
 .intake-panel-glow.is-visible { opacity: 1; }
 @media not all and (hover: hover) and (pointer: fine) {
   .intake-panel-glow { display: none; }
-}
-
-/* Placeholder-kaart (nog geen echte case) */
-.card--placeholder {
-  background: var(--seppeverbeke-lavender-100);
-  border-color: var(--seppeverbeke-lavender-300);
 }
 
 /* ==========================================================================
