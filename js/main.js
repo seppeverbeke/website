@@ -89,37 +89,106 @@ if (portfolioGrid) {
   const filterCount = document.getElementById('filter-count');
   const emptyState = document.getElementById('portfolio-empty');
   const cards = Array.from(portfolioGrid.querySelectorAll('.card'));
+  const prefersReducedMotionFilter = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  const FADE_OUT_MS = 220;
+  // Fade + stagger swap, reusing the scroll-reveal opacity/translateY
+  // pattern and easing curve (see .reveal in style.css) instead of a new
+  // motion language. Reduced motion collapses this to a simple, short,
+  // un-staggered crossfade (see the .filter-fade-* prefers-reduced-motion
+  // override in style.css).
+  const FADE_OUT_MS = prefersReducedMotionFilter ? 120 : 140;
+  const FADE_IN_MS = prefersReducedMotionFilter ? 120 : 320;
+  const STAGGER_MS = prefersReducedMotionFilter ? 0 : 90;
+
   let activeFilter = 'all';
+  let transitionToken = 0;
 
   const applyFilters = () => {
-    portfolioGrid.classList.toggle('is-filtered', activeFilter !== 'all');
-    let visible = 0;
-    cards.forEach((card) => {
-      const isMatch = activeFilter === 'all' || card.dataset.category === activeFilter;
-      if (isMatch) {
-        card.classList.remove('is-filtered-out');
-        card.classList.remove('is-fading-out');
-        card.classList.remove('card-enter');
-        void card.offsetWidth; // restart the fade-in animation
-        card.classList.add('card-enter');
-        visible += 1;
-      } else if (!card.classList.contains('is-filtered-out')) {
-        // Fade out subtly first, only remove from layout flow once the transition finishes
-        card.classList.add('is-fading-out');
-        window.setTimeout(() => {
-          if (card.classList.contains('is-fading-out')) {
-            card.classList.add('is-filtered-out');
-          }
-        }, FADE_OUT_MS);
+    const myToken = ++transitionToken;
+
+    // Lock the grid's current height for the duration of the transition so
+    // swapping cards (and, potentially, the bento/uniform layout) doesn't
+    // make the page jump. Released once the new state has settled.
+    const lockedHeight = portfolioGrid.getBoundingClientRect().height;
+    portfolioGrid.style.minHeight = `${lockedHeight}px`;
+
+    const currentlyVisible = cards.filter((card) => !card.classList.contains('is-filtered-out'));
+
+    const finishTransition = () => {
+      if (myToken !== transitionToken) return;
+      portfolioGrid.style.minHeight = '';
+    };
+
+    const swapAndFadeIn = () => {
+      if (myToken !== transitionToken) return; // superseded by a newer filter click
+
+      // The layout swap (bento <-> uniform grid) happens here, while the
+      // previous cards are fully faded out, so the structural change is
+      // covered by the same transition instead of snapping visibly.
+      portfolioGrid.classList.toggle('is-filtered', activeFilter !== 'all');
+
+      let visible = 0;
+      const toFadeIn = [];
+      cards.forEach((card) => {
+        card.classList.remove('filter-fade-out');
+        card.style.transitionDelay = '';
+        const isMatch = activeFilter === 'all' || card.dataset.category === activeFilter;
+        if (isMatch) {
+          card.classList.remove('is-filtered-out');
+          visible += 1;
+          toFadeIn.push(card);
+        } else {
+          card.classList.add('is-filtered-out');
+          card.classList.remove('filter-fade-in', 'filter-fade-in-active');
+        }
+      });
+
+      if (filterCount) {
+        filterCount.textContent =
+          activeFilter === 'all' ? `${cards.length} projecten` : `${visible} van ${cards.length} projecten`;
       }
-    });
-    if (filterCount) {
-      filterCount.textContent =
-        activeFilter === 'all' ? `${cards.length} projecten` : `${visible} van ${cards.length} projecten`;
+      if (emptyState) emptyState.hidden = visible !== 0;
+
+      // Prime the fade-in start state first, then flip to the visible state
+      // a frame later (staggered per card) so the transition actually runs.
+      toFadeIn.forEach((card) => {
+        card.classList.remove('filter-fade-in-active');
+        card.classList.add('filter-fade-in');
+      });
+      void portfolioGrid.offsetWidth; // force reflow before starting the transition
+      requestAnimationFrame(() => {
+        if (myToken !== transitionToken) return;
+        toFadeIn.forEach((card, i) => {
+          card.style.transitionDelay = `${i * STAGGER_MS}ms`;
+          card.classList.add('filter-fade-in-active');
+        });
+      });
+
+      const totalMs = FADE_IN_MS + Math.max(0, toFadeIn.length - 1) * STAGGER_MS;
+      window.setTimeout(() => {
+        if (myToken !== transitionToken) return;
+        toFadeIn.forEach((card) => {
+          card.classList.remove('filter-fade-in', 'filter-fade-in-active');
+          card.style.transitionDelay = '';
+        });
+        finishTransition();
+      }, totalMs + 50);
+    };
+
+    if (!currentlyVisible.length) {
+      // Nothing on screen to fade out (e.g. very first paint) — swap straight away.
+      swapAndFadeIn();
+      return;
     }
-    if (emptyState) emptyState.hidden = visible !== 0;
+
+    currentlyVisible.forEach((card) => {
+      card.classList.remove('filter-fade-in', 'filter-fade-in-active');
+      card.style.transitionDelay = '';
+      card.classList.add('filter-fade-out');
+    });
+    // Slight overlap instead of a hard sequential wait, so the swap feels
+    // continuous rather than a fade-out-then-fade-in with a visible gap.
+    window.setTimeout(swapAndFadeIn, Math.round(FADE_OUT_MS * 0.7));
   };
 
   // Initial paint: set visibility directly, no fade animation on load

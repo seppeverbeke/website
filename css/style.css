@@ -758,20 +758,38 @@ p { margin: 0; }
 }
 
 .tile-grid .card {
-  transition: opacity 220ms ease, transform 220ms ease, border-color var(--seppeverbeke-transition), box-shadow var(--seppeverbeke-transition);
-}
-.tile-grid .card.is-fading-out {
-  opacity: 0;
-  transform: translateY(6px) scale(0.98);
-  pointer-events: none;
+  transition: border-color var(--seppeverbeke-transition), box-shadow var(--seppeverbeke-transition);
 }
 .tile-grid .card.is-filtered-out { display: none; }
 
-@keyframes card-fade-in {
-  from { opacity: 0; transform: translateY(8px) scale(0.98); }
-  to { opacity: 1; transform: none; }
+/* Filter fade + stagger swap — reuses the .reveal opacity/translateY pattern
+   and ease-out curve so filtering the portfolio feels like the same motion
+   language as the rest of the site, instead of a new one-off animation. */
+.tile-grid .card.filter-fade-out {
+  transition: opacity 140ms ease-out, transform 140ms ease-out;
+  opacity: 0;
+  transform: translateY(-5px);
+  pointer-events: none;
 }
-.tile-grid .card.card-enter { animation: card-fade-in 0.35s ease both; }
+.tile-grid .card.filter-fade-in {
+  opacity: 0;
+  transform: translateY(5px);
+  transition: opacity 320ms ease-out, transform 320ms ease-out;
+  pointer-events: none;
+}
+.tile-grid .card.filter-fade-in.filter-fade-in-active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile-grid .card.filter-fade-out,
+  .tile-grid .card.filter-fade-in {
+    transform: none !important;
+    transition-duration: 120ms !important;
+    transition-delay: 0ms !important;
+  }
+}
 
 .step-number {
   font-family: var(--seppeverbeke-font-mono);
