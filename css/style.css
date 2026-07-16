@@ -791,13 +791,6 @@ p { margin: 0; }
   }
 }
 
-.step-number {
-  font-family: var(--seppeverbeke-font-mono);
-  font-size: 32px;
-  font-weight: 500;
-  color: var(--seppeverbeke-lavender-300);
-}
-
 /* ==========================================================================
    Text + image
    ========================================================================== */
@@ -927,6 +920,20 @@ p { margin: 0; }
   gap: var(--seppeverbeke-space-4);
 }
 .cta-banner h2 { color: #FFFFFF; }
+
+/* Subtle dot-grid texture — pure atmosphere on the homepage's dark CTA band,
+   kept low-opacity so it never competes with the CTA text. Scoped to this
+   modifier only, so diensten.html's cta-banner (same base class) is untouched. */
+.cta-banner--dots { position: relative; overflow: hidden; }
+.cta-banner--dots::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.10) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+.cta-banner--dots > * { position: relative; z-index: 1; }
 
 /* ==========================================================================
    Stat row
@@ -1324,9 +1331,9 @@ p { margin: 0; }
 
 /* Doorlopend verhaal — thin vertical line + mono phase label per paragraph,
    reusing the site's existing line color/style (same as .footer-divider /
-   .signal-list dividers) and the mono/Lavender-300 language of .step-number,
-   rather than inventing a new visual element. max-width lives on .case-phase
-   (not the wrapper) so a full-width illustration — e.g. the process-strip or
+   .signal-list dividers) and the mono/Lavender-300 language used elsewhere
+   for step numbering, rather than inventing a new visual element. max-width
+   lives on .case-phase (not the wrapper) so a full-width illustration — e.g. the process-strip or
    a tile-grid, moved inside this same story on the portfolio case template —
    can share the wrapper's border-left/gap without being squeezed to reading
    width itself. */
