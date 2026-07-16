@@ -203,17 +203,51 @@ p { margin: 0; }
 .btn-sm { padding: 10px 20px; font-size: 14px; }
 
 /* Secondary action as a text link instead of a pill button — used wherever
-   a button would compete visually with the page's primary CTA. */
+   a button would compete visually with the page's primary CTA. Reusable
+   everywhere this pattern appears (hero, diensten split sections, 404, ...).
+   Markup: <a class="link-arrow"><span class="link-arrow-text">Label</span><span class="link-arrow-icon">→</span></a> */
 .link-arrow {
   display: inline-flex;
   align-items: center;
-  gap: var(--seppeverbeke-space-2);
+  gap: 8px;
   color: var(--seppeverbeke-ink-900);
+  font-family: var(--seppeverbeke-font-body);
   font-weight: 600;
   font-size: 15px;
+}
+.link-arrow-text {
+  background-image: linear-gradient(var(--seppeverbeke-lavender-500), var(--seppeverbeke-lavender-500));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  padding-bottom: 2px;
+  transition: color var(--seppeverbeke-transition), background-size var(--seppeverbeke-transition);
+}
+.link-arrow-icon {
+  display: inline-block;
   transition: transform var(--seppeverbeke-transition), color var(--seppeverbeke-transition);
 }
-.link-arrow:hover { transform: translateX(4px); color: var(--seppeverbeke-lavender-700); }
+.link-arrow:hover .link-arrow-text,
+.link-arrow:focus-visible .link-arrow-text {
+  color: var(--seppeverbeke-lavender-700);
+  background-size: 100% 1px;
+}
+.link-arrow:hover .link-arrow-icon,
+.link-arrow:focus-visible .link-arrow-icon {
+  color: var(--seppeverbeke-lavender-700);
+  transform: translateX(4px);
+}
+.link-arrow:focus-visible {
+  outline: 2px solid var(--seppeverbeke-lavender-500);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .link-arrow:hover .link-arrow-icon,
+  .link-arrow:focus-visible .link-arrow-icon {
+    transform: none;
+  }
+}
 
 /* ==========================================================================
    Header / Nav
@@ -785,13 +819,6 @@ p { margin: 0; }
   color: var(--seppeverbeke-lavender-700);
 }
 .split-media-icon svg { width: 30%; height: 30%; min-width: 64px; min-height: 64px; stroke-width: 1.3; }
-.split-body a {
-  display: inline-block;
-  color: var(--seppeverbeke-lavender-700);
-  font-weight: 600;
-  transition: transform var(--seppeverbeke-transition);
-}
-.split-body a:hover { transform: translateX(4px); }
 .split-body p { color: var(--seppeverbeke-ink-500); margin-top: var(--seppeverbeke-space-3); }
 
 .case-body { max-width: 680px; }
