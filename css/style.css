@@ -1219,7 +1219,7 @@ body.mobile-nav-open { overflow: hidden; }
    ========================================================================== */
 .site-footer {
   border-top: 1px solid var(--seppeverbeke-line);
-  padding-top: var(--seppeverbeke-space-7);
+  padding-top: var(--seppeverbeke-space-5);
 }
 
 /* Single shared container: every row below (including the CTA card) is a
@@ -1289,13 +1289,18 @@ body.mobile-nav-open { overflow: hidden; }
   gap: var(--seppeverbeke-space-4);
   border-bottom: 1px solid var(--seppeverbeke-line);
   padding-block: var(--seppeverbeke-space-5);
-  margin-top: var(--seppeverbeke-space-6);
+  margin-top: var(--seppeverbeke-space-4);
 }
 .footer-brand-line {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   line-height: 1;
+}
+.footer-brand-line > .wordmark,
+.footer-brand-line > .footer-divider {
+  flex-shrink: 0;
 }
 .footer-divider {
   display: inline-block;
@@ -1307,7 +1312,14 @@ body.mobile-nav-open { overflow: hidden; }
   color: var(--seppeverbeke-ink-500);
   font-size: 15px;
 }
-.footer-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 28px; line-height: 1; }
+.footer-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: var(--seppeverbeke-space-3) var(--seppeverbeke-space-5);
+  width: 100%;
+  line-height: 1;
+}
 .footer-nav a { color: var(--seppeverbeke-ink-500); font-size: 15px; }
 .footer-nav a:hover { color: var(--seppeverbeke-ink-900); }
 
@@ -1330,13 +1342,13 @@ body.mobile-nav-open { overflow: hidden; }
 .footer-signature {
   overflow: hidden;
   text-align: center;
-  padding-block: var(--seppeverbeke-space-6) var(--seppeverbeke-space-4);
+  padding-block: var(--seppeverbeke-space-5) var(--seppeverbeke-space-4);
 }
 .footer-signature-text {
   display: inline-block;
   font-family: var(--seppeverbeke-font-display);
   font-weight: 900;
-  font-size: clamp(46px, 12vw, 158px);
+  font-size: clamp(30px, 11.5vw, 158px);
   line-height: 1;
   letter-spacing: -0.03em;
   color: var(--seppeverbeke-lavender-100);
@@ -1344,10 +1356,13 @@ body.mobile-nav-open { overflow: hidden; }
 }
 
 @media (min-width: 768px) {
+  .site-footer { padding-top: var(--seppeverbeke-space-7); }
   .footer-cta-card { flex-direction: row; align-items: center; justify-content: space-between; gap: var(--seppeverbeke-space-5); }
   .footer-cta-actions { align-items: flex-end; }
-  .footer-row--brand { flex-direction: row; align-items: center; justify-content: space-between; }
+  .footer-row--brand { flex-direction: row; align-items: center; justify-content: space-between; margin-top: var(--seppeverbeke-space-6); }
   .footer-row--copyright { flex-direction: row; align-items: center; justify-content: space-between; }
+  .footer-nav { display: flex; flex-wrap: wrap; width: auto; gap: 28px; }
+  .footer-signature { padding-block: var(--seppeverbeke-space-6) var(--seppeverbeke-space-4); }
 }
 
 /* ==========================================================================
