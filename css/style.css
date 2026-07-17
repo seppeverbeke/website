@@ -932,6 +932,12 @@ body.mobile-nav-open { overflow: hidden; }
 .case-body { max-width: 680px; }
 .case-body p { color: var(--seppeverbeke-ink-900); }
 .case-body p + p { margin-top: var(--seppeverbeke-space-4); }
+.case-body h3 { margin-top: var(--seppeverbeke-space-6); margin-bottom: var(--seppeverbeke-space-3); }
+.case-body h3:first-child { margin-top: 0; }
+.case-body a { color: var(--seppeverbeke-lavender-700); text-decoration: underline; text-underline-offset: 2px; }
+.case-body a:hover,
+.case-body a:focus-visible { color: var(--seppeverbeke-lavender-900); }
+.case-body .legal-updated { margin-top: var(--seppeverbeke-space-6); color: var(--seppeverbeke-ink-500); font-size: 14px; }
 
 .back-link {
   display: inline-flex;
