@@ -546,6 +546,7 @@ body.mobile-nav-open { overflow: hidden; }
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--seppeverbeke-space-3);
   margin-top: var(--seppeverbeke-space-6);
 }
