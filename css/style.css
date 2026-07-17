@@ -220,7 +220,12 @@ p { margin: 0; }
   background-repeat: no-repeat;
   background-position: 0 100%;
   background-size: 0% 1px;
-  padding-bottom: 2px;
+  /* Symmetric padding so the flex-centered text glyph sits truly centered
+     within its own box. The underline gap (padding-bottom) is unaffected
+     by padding-top, since background-position 100% anchors to the bottom
+     edge of the padding box regardless of top padding. Without the matching
+     top padding, the text sat ~1px above the button's text center. */
+  padding-block: 2px;
   transition: color var(--seppeverbeke-transition), background-size var(--seppeverbeke-transition);
 }
 .link-arrow-icon {
