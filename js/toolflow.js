@@ -51,7 +51,7 @@
   // Delay (ms) between the pulse of one connector dot and the next, so the
   // whole diagram's dots light up as a single continuous left-to-right (or
   // top-to-bottom on mobile) sequence rather than per-connector groups.
-  var DOT_STAGGER_MS = 150;
+  var DOT_STAGGER_MS = 80;
 
   function initials(name) {
     return String(name)

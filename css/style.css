@@ -1208,7 +1208,7 @@ body.mobile-nav-open { overflow: hidden; }
    only — js/toolflow.js setupToolflowPlay()). Dots return to and stay at
    their rest appearance once their own pulse ends; nothing loops. */
 .toolflow-flow--play .toolflow-dot {
-  animation: toolflow-dot-pulse 0.4s ease-out both;
+  animation: toolflow-dot-pulse 0.22s ease-out both;
   animation-delay: var(--dot-delay, 0ms);
 }
 @keyframes toolflow-dot-pulse {
@@ -1218,9 +1218,9 @@ body.mobile-nav-open { overflow: hidden; }
     opacity: 0.35;
   }
   50% {
-    transform: scale(1.5);
+    transform: scale(1.35);
     background-color: var(--seppeverbeke-lavender-500);
-    opacity: 0.75;
+    opacity: 0.65;
   }
 }
 @media (prefers-reduced-motion: reduce) {
