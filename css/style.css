@@ -1050,7 +1050,7 @@ body.mobile-nav-open { overflow: hidden; }
   flex-direction: column;
   align-items: center;
   gap: var(--seppeverbeke-space-3);
-  width: 160px;
+  width: 184px;
   flex-shrink: 0;
   text-align: center;
   border-radius: var(--seppeverbeke-radius-card);
@@ -1071,8 +1071,8 @@ body.mobile-nav-open { overflow: hidden; }
        whole row fits without wrapping or horizontal scroll, even right
        around the 768px boundary or the 992px container-padding jump. */
     width: auto;
-    flex: 1 1 clamp(64px, 10vw, 132px);
-    max-width: 132px;
+    flex: 1 1 clamp(84px, 12.5vw, 168px);
+    max-width: 168px;
     min-width: 0;
   }
 }
@@ -1085,8 +1085,8 @@ body.mobile-nav-open { overflow: hidden; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 104px;
-  height: 104px;
+  width: 128px;
+  height: 128px;
   border-radius: 50%;
   background: var(--seppeverbeke-lavender-100);
   flex-shrink: 0;
@@ -1108,7 +1108,7 @@ body.mobile-nav-open { overflow: hidden; }
 }
 .toolflow-icon--fallback {
   font-family: var(--seppeverbeke-font-mono);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 500;
   color: var(--seppeverbeke-lavender-700);
 }
@@ -1185,14 +1185,21 @@ body.mobile-nav-open { overflow: hidden; }
   scroll-margin-top: 96px;
   transition: background var(--seppeverbeke-transition), border-color var(--seppeverbeke-transition), box-shadow var(--seppeverbeke-transition);
 }
+/* Deliberately styled as clearly subordinate to the case-phase-label
+   eyebrows ("01 · Probleem", "02 · Aanpak", "03 · Resultaat") above and
+   below this list: smaller size, muted grey instead of the lavender accent
+   those hoofdsecties use, and "Stap N" wording instead of a bare number —
+   so "Stap 6" never reads as a hoofdsectie in its own right while scrolling
+   past it into "03 · Resultaat". */
 .toolflow-step-num {
   flex-shrink: 0;
-  width: 22px;
-  padding-top: 2px;
+  white-space: nowrap;
+  padding-top: 3px;
   font-family: var(--seppeverbeke-font-mono);
-  font-size: 13px;
+  font-size: 10px;
   font-weight: 500;
-  color: var(--seppeverbeke-lavender-300);
+  letter-spacing: 0.02em;
+  color: var(--seppeverbeke-ink-500);
 }
 .toolflow-step-body { min-width: 0; }
 .toolflow-step-name {

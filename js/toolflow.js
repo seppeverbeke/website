@@ -54,10 +54,6 @@
   // before fading back to normal.
   var ACTIVE_HIGHLIGHT_MS = 2200;
 
-  function pad2(n) {
-    return (n < 10 ? "0" : "") + n;
-  }
-
   function initials(name) {
     return String(name)
       .split(/\s+/)
@@ -159,7 +155,7 @@
     var num = document.createElement("span");
     num.className = "toolflow-step-num";
     num.setAttribute("aria-hidden", "true");
-    num.textContent = pad2(index + 1);
+    num.textContent = "Stap " + (index + 1);
 
     var body = document.createElement("span");
     body.className = "toolflow-step-body";
