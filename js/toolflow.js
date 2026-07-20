@@ -1,24 +1,27 @@
 // ==========================================================================
-// Toolflow component — reusable horizontal (desktop) / vertical (mobile)
-// sequence of tool nodes connected by arrows, framed in a card, for the
-// "02 · Aanpak" section of portfolio case pages. Each node shows only a
-// logo + tool name (no caption line). See css/style.css for the .toolflow*
-// rules.
+// Toolflow component — a sequence of tool nodes connected by arrows, framed
+// in a card, for the "02 · Aanpak" section of portfolio case pages. Each
+// node shows a logo + tool name, always in full colour. See css/style.css
+// for the .toolflow* rules.
 //
-// On desktop, when the nodes don't fit on a single row, the diagram lays
-// itself out as a serpentine: row 1 left-to-right, row 2 right-to-left,
-// etc., connected by a curved line between rows. This is measured and
-// rebuilt on resize, so it works for any node count, not just 6. On
-// mobile it always stays a straight vertical column.
+// Layout: on desktop (>=768px) all nodes sit on a single horizontal row,
+// straight arrows in between. Node/icon size is fluid (CSS flexbox +
+// clamp()), so the whole row always fits without wrapping or horizontal
+// scroll, from the smallest supported desktop width up. No JS measuring or
+// resize handling is needed for this — it's pure CSS. On mobile the nodes
+// stack in the existing vertical column.
 //
 // Three functions work together, all driven by the same steps array so
 // content only needs to be edited in one place:
 //   - renderToolflow(elementId, steps)       → the visual diagram
-//   - renderToolflowSteps(elementId, steps)  → an optional numbered text
-//                                               list (needs a step.text)
-//   - initToolflowSync(diagramId, listId)    → hooks up hover/focus so a
-//                                               node and its matching step
-//                                               item highlight each other
+//   - renderToolflowSteps(elementId, steps)  → the numbered text list
+//                                               (needs a step.text)
+//   - initToolflowSync(diagramId, listId)    → hooks up:
+//       - hover/focus on a node → a scroll-free "preview" highlight on the
+//         matching step text (and vice versa), via data-step matching
+//       - click (or Enter/Space) on a node → smooth-scrolls to the
+//         matching step text and gives it a stronger, longer-lasting
+//         "active" highlight so it's obvious which step was just opened
 //
 // Nodes and step items are matched via a shared data-step="n" (1-based).
 //
@@ -47,9 +50,9 @@
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
 
-  function isRowMode() {
-    return !!(window.matchMedia && window.matchMedia("(min-width: 768px)").matches);
-  }
+  // How long the stronger "just clicked" highlight stays on the step text
+  // before fading back to normal.
+  var ACTIVE_HIGHLIGHT_MS = 2200;
 
   function pad2(n) {
     return (n < 10 ? "0" : "") + n;
@@ -67,16 +70,19 @@
       .toUpperCase();
   }
 
-  function applyFallback(node, icon, step) {
+  function applyFallback(icon, step) {
     icon.innerHTML = "";
     icon.classList.add("toolflow-icon--fallback");
     icon.textContent = initials(step.name);
-    node.classList.add("toolflow-node--fallback");
-    node.removeAttribute("tabindex");
   }
 
+  // Nodes are real <button> elements (not divs) so click + native
+  // Enter/Space keyboard activation both come for free and are properly
+  // accessible, since clicking a node is a real navigation action (it
+  // scrolls the page to the matching step).
   function buildNode(step, index) {
-    var node = document.createElement("div");
+    var node = document.createElement("button");
+    node.type = "button";
     node.className = "toolflow-node";
     node.dataset.step = String(index + 1);
 
@@ -86,15 +92,14 @@
     if (step.logo) {
       var img = document.createElement("img");
       img.src = step.logo;
-      img.alt = step.name || "";
+      img.alt = "";
       img.loading = "lazy";
       img.addEventListener("error", function () {
-        applyFallback(node, icon, step);
+        applyFallback(icon, step);
       });
       icon.appendChild(img);
-      node.tabIndex = 0;
     } else {
-      applyFallback(node, icon, step);
+      applyFallback(icon, step);
     }
 
     var name = document.createElement("span");
@@ -104,262 +109,19 @@
     node.appendChild(icon);
     node.appendChild(name);
 
-    if (step.name) node.setAttribute("aria-label", step.name);
+    if (step.name) {
+      node.setAttribute("aria-label", "Bekijk stap " + (index + 1) + ": " + step.name);
+    }
 
     return node;
   }
 
-  function buildArrow(flowIndex) {
+  function buildArrow() {
     var arrow = document.createElement("span");
     arrow.className = "toolflow-arrow";
     arrow.setAttribute("aria-hidden", "true");
     arrow.innerHTML = ARROW_SVG;
-
-    var spark = document.createElement("span");
-    spark.className = "toolflow-spark";
-    spark.style.setProperty("--flow-index", flowIndex);
-    arrow.appendChild(spark);
-
     return arrow;
-  }
-
-  function buildFlatInto(flowEl, steps) {
-    steps.forEach(function (step, index) {
-      flowEl.appendChild(buildNode(step, index));
-      if (index < steps.length - 1) flowEl.appendChild(buildArrow(index));
-    });
-  }
-
-  // Groups already-laid-out .toolflow-node elements by their offsetTop to
-  // find out how the browser naturally wrapped them into rows.
-  function measureRowCounts(flowEl) {
-    var nodes = Array.prototype.slice.call(flowEl.querySelectorAll(".toolflow-node"));
-    var rowCounts = [];
-    var lastTop = null;
-    nodes.forEach(function (node) {
-      var top = node.offsetTop;
-      if (lastTop === null || Math.abs(top - lastTop) > 4) {
-        rowCounts.push(0);
-        lastTop = top;
-      }
-      rowCounts[rowCounts.length - 1]++;
-    });
-    return rowCounts;
-  }
-
-  // Builds the serpentine rows structure. Odd rows (index 1, 3, ...) are
-  // flagged --reverse so they render right-to-left via flex row-reverse,
-  // without needing to actually reverse the DOM/step order. Returns the
-  // --flow-index assigned to each row transition, for the connector spark
-  // animation to line up with the in-row arrow sparks.
-  function buildSerpentineInto(rowsEl, steps, rowCounts) {
-    var idx = 0;
-    var flowIndex = 0;
-    var connectorFlowIndices = [];
-
-    rowCounts.forEach(function (count, rowIdx) {
-      var rowEl = document.createElement("div");
-      rowEl.className = "toolflow-row" + (rowIdx % 2 === 1 ? " toolflow-row--reverse" : "");
-
-      for (var i = 0; i < count; i++) {
-        rowEl.appendChild(buildNode(steps[idx], idx));
-        idx++;
-        if (i < count - 1) {
-          rowEl.appendChild(buildArrow(flowIndex));
-          flowIndex++;
-        }
-      }
-
-      rowsEl.appendChild(rowEl);
-
-      if (rowIdx < rowCounts.length - 1) {
-        connectorFlowIndices.push(flowIndex);
-        flowIndex++;
-      }
-    });
-
-    return connectorFlowIndices;
-  }
-
-  // Draws a curved SVG connector (+ matching flow-spark) between the last
-  // node of each row and the first node of the next, positioned from
-  // actual measured coordinates so it lines up regardless of row length,
-  // node count, or which side the row reads from.
-  function drawConnectors(rowsEl, flowIndices) {
-    var rows = Array.prototype.slice.call(rowsEl.querySelectorAll(".toolflow-row"));
-    var wrapRect = rowsEl.getBoundingClientRect();
-    var svgNS = "http://www.w3.org/2000/svg";
-
-    for (var i = 0; i < rows.length - 1; i++) {
-      var fromNodes = rows[i].querySelectorAll(".toolflow-node");
-      var toNodes = rows[i + 1].querySelectorAll(".toolflow-node");
-      var fromIcon = fromNodes[fromNodes.length - 1].querySelector(".toolflow-icon");
-      var toIcon = toNodes[0].querySelector(".toolflow-icon");
-      var fRect = fromIcon.getBoundingClientRect();
-      var tRect = toIcon.getBoundingClientRect();
-
-      var x1 = fRect.left + fRect.width / 2 - wrapRect.left;
-      var y1 = fRect.bottom - wrapRect.top;
-      var x2 = tRect.left + tRect.width / 2 - wrapRect.left;
-      var y2 = tRect.top - wrapRect.top;
-
-      // Bow the curve out to the side the flow is turning on (right after
-      // an ltr row, left after a reversed/rtl row) rather than a bezier
-      // interpolated straight between the two endpoints — otherwise
-      // symmetric rows (equal length, same column) produce a degenerate
-      // straight vertical line instead of a visible curve.
-      var side = i % 2 === 0 ? 1 : -1;
-      var bow = 40;
-      var c1x = x1 + side * bow;
-      var c1y = y1 + (y2 - y1) * 0.35;
-      var c2x = x2 + side * bow;
-      var c2y = y1 + (y2 - y1) * 0.65;
-
-      var pad = 12;
-      var minX = Math.min(x1, x2, c1x, c2x) - pad;
-      var maxX = Math.max(x1, x2, c1x, c2x) + pad;
-      var left = minX;
-      var top = y1;
-      var width = maxX - minX;
-      var height = Math.max(y2 - y1, 1);
-      var offsetX = x1 - left;
-
-      var dLocal =
-        "M " + offsetX + " 0" +
-        " C " + (c1x - left) + " " + (c1y - top) +
-        ", " + (c2x - left) + " " + (c2y - top) +
-        ", " + (x2 - left) + " " + height;
-      var dGlobal =
-        "M " + x1 + " " + y1 +
-        " C " + c1x + " " + c1y +
-        ", " + c2x + " " + c2y +
-        ", " + x2 + " " + y2;
-
-      var svg = document.createElementNS(svgNS, "svg");
-      svg.setAttribute("class", "toolflow-connector");
-      svg.setAttribute("aria-hidden", "true");
-      svg.style.left = left + "px";
-      svg.style.top = top + "px";
-      svg.style.width = width + "px";
-      svg.style.height = height + "px";
-      svg.setAttribute("viewBox", "0 0 " + width + " " + height);
-
-      var markerId = "toolflow-arrowhead-" + Math.random().toString(36).slice(2, 9);
-      svg.innerHTML =
-        '<defs><marker id="' +
-        markerId +
-        '" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">' +
-        '<path d="M0,0 L10,5 L0,10 Z" fill="currentColor"></path></marker></defs>' +
-        '<path class="toolflow-connector-path" d="' +
-        dLocal +
-        '" marker-end="url(#' +
-        markerId +
-        ')"></path>';
-      rowsEl.appendChild(svg);
-
-      var spark = document.createElement("span");
-      spark.className = "toolflow-connector-spark";
-      spark.style.setProperty("--flow-index", flowIndices[i]);
-      spark.style.offsetPath = "path('" + dGlobal + "')";
-      rowsEl.appendChild(spark);
-    }
-  }
-
-  function layout(instance) {
-    var container = instance.container;
-    var steps = instance.steps;
-    container.innerHTML = "";
-
-    var flowEl = document.createElement("div");
-    flowEl.className = "toolflow-flow";
-    buildFlatInto(flowEl, steps);
-    container.appendChild(flowEl);
-
-    if (!isRowMode() || steps.length < 2) return;
-
-    var rowCounts = measureRowCounts(flowEl);
-    if (rowCounts.length <= 1) return;
-
-    // Needs a serpentine layout: rebuild into row groups. Everything below
-    // runs synchronously (before the browser paints), so there's no
-    // flat-then-serpentine flash.
-    container.innerHTML = "";
-    var rowsEl = document.createElement("div");
-    rowsEl.className = "toolflow-rows";
-    var connectorFlowIndices = buildSerpentineInto(rowsEl, steps, rowCounts);
-    container.appendChild(rowsEl);
-    drawConnectors(rowsEl, connectorFlowIndices);
-  }
-
-  // ------------------------------------------------------------------
-  // Shared resize handling (debounced) across every toolflow instance.
-  // ------------------------------------------------------------------
-  var layoutInstances = [];
-  var resizeTimer = null;
-
-  function relayoutAll() {
-    layoutInstances.forEach(layout);
-  }
-
-  function scheduleRelayout() {
-    clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(relayoutAll, 150);
-  }
-
-  // ------------------------------------------------------------------
-  // One-time "data flows through the pipe" spark animation, played once
-  // when the diagram first scrolls into view. Skipped entirely under
-  // prefers-reduced-motion.
-  // ------------------------------------------------------------------
-  function setupFlowPlay(container) {
-    if (reducedMotion || !("IntersectionObserver" in window)) return;
-    var observer = new IntersectionObserver(
-      function (entries) {
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) {
-            container.classList.add("toolflow--flow-play");
-            observer.unobserve(container);
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-    observer.observe(container);
-  }
-
-  // ------------------------------------------------------------------
-  // Subtle scroll parallax: the whole node/arrow group (not individual
-  // nodes, so row/connector alignment never drifts) shifts a few px
-  // against scroll speed. Disabled under prefers-reduced-motion.
-  // ------------------------------------------------------------------
-  var parallaxInstances = [];
-  var parallaxTicking = false;
-
-  function updateParallax() {
-    parallaxTicking = false;
-    var vh = window.innerHeight || document.documentElement.clientHeight;
-    parallaxInstances.forEach(function (container) {
-      var rect = container.getBoundingClientRect();
-      if (rect.bottom < -200 || rect.top > vh + 200) return;
-      var centerDelta = rect.top + rect.height / 2 - vh / 2;
-      var shift = Math.max(-8, Math.min(8, centerDelta * -0.03));
-      container.style.setProperty("--toolflow-parallax", shift.toFixed(2) + "px");
-    });
-  }
-
-  function requestParallaxUpdate() {
-    if (parallaxTicking) return;
-    parallaxTicking = true;
-    requestAnimationFrame(updateParallax);
-  }
-
-  function setupParallax(container) {
-    if (reducedMotion) return;
-    if (!parallaxInstances.length) {
-      window.addEventListener("scroll", requestParallaxUpdate, { passive: true });
-    }
-    parallaxInstances.push(container);
-    requestParallaxUpdate();
   }
 
   window.renderToolflow = function renderToolflow(elementId, steps) {
@@ -372,13 +134,15 @@
       "Volledige flow: " + steps.map(function (step) { return step.name; }).join(" → ")
     );
 
-    var instance = { container: container, steps: steps };
-    if (!layoutInstances.length) window.addEventListener("resize", scheduleRelayout);
-    layoutInstances.push(instance);
-    layout(instance);
+    var flowEl = document.createElement("div");
+    flowEl.className = "toolflow-flow";
+    steps.forEach(function (step, index) {
+      flowEl.appendChild(buildNode(step, index));
+      if (index < steps.length - 1) flowEl.appendChild(buildArrow());
+    });
 
-    setupFlowPlay(container);
-    setupParallax(container);
+    container.innerHTML = "";
+    container.appendChild(flowEl);
   };
 
   // ------------------------------------------------------------------
@@ -430,11 +194,17 @@
   };
 
   // ------------------------------------------------------------------
-  // Bidirectional hover/focus sync between diagram nodes and step-list
-  // items sharing the same data-step. Delegated on the two root
-  // containers (which persist across diagram resize/rebuilds) via
-  // mouseover/mouseout + focusin/focusout, so it never needs to be
-  // re-bound after a serpentine relayout replaces the node elements.
+  // Diagram ↔ step-list coupling, delegated on the two root containers
+  // (stable across re-renders) so nothing needs re-binding:
+  //
+  //   - hover / keyboard focus on either side → scroll-free "preview"
+  //     highlight (.toolflow-node--linked / .toolflow-step--linked) on
+  //     both sides at once, matched via data-step.
+  //   - click (or Enter/Space) on a diagram node → smooth-scrolls the
+  //     page to the matching step text and marks it with a stronger,
+  //     longer-lived .toolflow-step--active highlight so it's obvious
+  //     which step was just opened, distinct from the subtler hover
+  //     preview above.
   // ------------------------------------------------------------------
   window.initToolflowSync = function initToolflowSync(diagramId, listId) {
     var diagram = document.getElementById(diagramId);
@@ -473,6 +243,31 @@
       root.addEventListener("focusout", function (e) {
         setActive(stepFromTarget(e.target), false);
       });
+    });
+
+    var activeTimer = null;
+
+    function goToStep(step) {
+      if (!step) return;
+      var item = list.querySelector('.toolflow-step[data-step="' + step + '"]');
+      if (!item) return;
+
+      var prevActive = list.querySelector(".toolflow-step--active");
+      if (prevActive && prevActive !== item) prevActive.classList.remove("toolflow-step--active");
+      if (activeTimer) clearTimeout(activeTimer);
+
+      item.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+      item.classList.add("toolflow-step--active");
+      activeTimer = setTimeout(function () {
+        item.classList.remove("toolflow-step--active");
+        activeTimer = null;
+      }, ACTIVE_HIGHLIGHT_MS);
+    }
+
+    diagram.addEventListener("click", function (e) {
+      var node = e.target.closest(".toolflow-node");
+      if (!node) return;
+      goToStep(node.getAttribute("data-step"));
     });
   };
 })();
