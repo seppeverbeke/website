@@ -1040,9 +1040,20 @@ body.mobile-nav-open { overflow: hidden; }
   .toolflow-flow {
     flex-direction: row;
     flex-wrap: nowrap;
-    align-items: flex-start;
+    /* Centered (not flex-start) so every row item — icon-only nodes and the
+       dot connectors alike — lines up on one shared cross-axis center. See
+       .toolflow-name below: at this breakpoint the name label is taken out
+       of flow (position: absolute), so a node's in-flow height collapses to
+       exactly its icon's height, which is what makes this centering land
+       the dots precisely on the icon circles' vertical center. */
+    align-items: center;
     justify-content: center;
     gap: clamp(6px, 1.6vw, 28px);
+    /* Reserves room below the row for the absolutely-positioned name
+       labels (up to ~2 lines for the longest name, "Sales Navigator", at
+       the narrowest supported desktop width) now that they no longer
+       contribute to the row's own height. */
+    padding-bottom: 64px;
   }
 }
 .toolflow-node {
@@ -1063,6 +1074,7 @@ body.mobile-nav-open { overflow: hidden; }
   cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
+  position: relative;
 }
 @media (min-width: 768px) {
   .toolflow-node {
@@ -1142,24 +1154,81 @@ body.mobile-nav-open { overflow: hidden; }
   font-size: 15px;
   color: var(--seppeverbeke-ink-900);
 }
-.toolflow-arrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--seppeverbeke-lavender-300);
-  transform: rotate(90deg);
-}
 @media (min-width: 768px) {
-  .toolflow-arrow {
-    flex: 0 0 clamp(14px, 2vw, 22px);
-    transform: none;
-    margin-top: 40px;
+  /* Taken out of flow so the node's in-flow height becomes exactly the
+     icon's height — see the .toolflow-flow align-items: center comment
+     above for why this is what makes the dot connectors land precisely on
+     the icon circles' vertical center. */
+  .toolflow-name {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: var(--seppeverbeke-space-3);
   }
 }
-.toolflow-arrow svg { width: 26px; height: 26px; }
+
+/* Connector between two consecutive nodes: 3 small dots, a recurring
+   riff on the site's .wordmark-dot brand detail, replacing the previous
+   arrow. Mobile: a short vertical column between stacked nodes. Desktop
+   (>=768px): a horizontal row, vertically centered on the icon circles via
+   .toolflow-flow's align-items: center (see above). Purely decorative
+   (aria-hidden), no arrowhead/line. */
+.toolflow-dots {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-evenly;
+  flex-shrink: 0;
+  height: 32px;
+}
 @media (min-width: 768px) {
-  .toolflow-arrow svg { width: 100%; height: auto; }
+  .toolflow-dots {
+    flex-direction: row;
+    flex: 0 0 clamp(28px, 3vw, 44px);
+    width: auto;
+    height: auto;
+  }
+}
+.toolflow-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  /* Same lavender tint family as the node-icon circle background, one step
+     stronger (lavender-300 vs the icon's lavender-100) so the dots stay
+     legibly visible at rest against the white card instead of nearly
+     disappearing. */
+  background-color: var(--seppeverbeke-lavender-300);
+  opacity: 0.35;
+}
+/* Scroll-into-view pulse: a single continuous sequence across every dot in
+   the whole diagram (see js/toolflow.js buildDots()'s --dot-delay), played
+   once via .toolflow-flow--play (added by IntersectionObserver, first time
+   only — js/toolflow.js setupToolflowPlay()). Dots return to and stay at
+   their rest appearance once their own pulse ends; nothing loops. */
+.toolflow-flow--play .toolflow-dot {
+  animation: toolflow-dot-pulse 0.4s ease-out both;
+  animation-delay: var(--dot-delay, 0ms);
+}
+@keyframes toolflow-dot-pulse {
+  0%, 100% {
+    transform: scale(1);
+    background-color: var(--seppeverbeke-lavender-300);
+    opacity: 0.35;
+  }
+  50% {
+    transform: scale(1.5);
+    background-color: var(--seppeverbeke-lavender-500);
+    opacity: 0.75;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Rest state already matches the pulse's start/end state, so simply
+     never animating shows the correct "end state" immediately. */
+  .toolflow-flow--play .toolflow-dot {
+    animation: none;
+  }
 }
 
 /* Numbered text-step list (js/toolflow.js renderToolflowSteps()), rendered

@@ -40,12 +40,6 @@
 //   </script>
 // ==========================================================================
 (function () {
-  var ARROW_SVG =
-    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-    '<line x1="5" y1="12" x2="19" y2="12"></line>' +
-    '<polyline points="13 6 19 12 13 18"></polyline>' +
-    "</svg>";
-
   var reducedMotion = !!(
     window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches
   );
@@ -53,6 +47,11 @@
   // How long the stronger "just clicked" highlight stays on the step text
   // before fading back to normal.
   var ACTIVE_HIGHLIGHT_MS = 2200;
+
+  // Delay (ms) between the pulse of one connector dot and the next, so the
+  // whole diagram's dots light up as a single continuous left-to-right (or
+  // top-to-bottom on mobile) sequence rather than per-connector groups.
+  var DOT_STAGGER_MS = 150;
 
   function initials(name) {
     return String(name)
@@ -112,12 +111,51 @@
     return node;
   }
 
-  function buildArrow() {
-    var arrow = document.createElement("span");
-    arrow.className = "toolflow-arrow";
-    arrow.setAttribute("aria-hidden", "true");
-    arrow.innerHTML = ARROW_SVG;
-    return arrow;
+  // Connector between two consecutive nodes: 3 small dots (the site's
+  // ".wordmark-dot" visual language, reused here as a recurring brand
+  // detail) instead of an arrow. `dotStartIndex` is the running dot count
+  // across the *whole* diagram so far, used purely to compute each dot's
+  // animation-delay — this is what makes the scroll-in pulse read as one
+  // continuous sequence across all connectors rather than 3 independent
+  // per-connector groups.
+  function buildDots(dotStartIndex) {
+    var dots = document.createElement("span");
+    dots.className = "toolflow-dots";
+    dots.setAttribute("aria-hidden", "true");
+    for (var i = 0; i < 3; i++) {
+      var dot = document.createElement("span");
+      dot.className = "toolflow-dot";
+      dot.style.setProperty("--dot-delay", (dotStartIndex + i) * DOT_STAGGER_MS + "ms");
+      dots.appendChild(dot);
+    }
+    return dots;
+  }
+
+  // Plays the dot-pulse sequence exactly once, the first time the diagram
+  // scrolls into view — never again on scroll-out/scroll-back-in. Adding a
+  // persistent class (rather than toggling it) plus unobserving right away
+  // is what guarantees the "only once" behaviour.
+  function setupToolflowPlay(container, flowEl) {
+    if (reducedMotion) return; // rest-state dots already show the end state.
+
+    if (!("IntersectionObserver" in window)) {
+      // No IO support: just show the played state immediately rather than
+      // leaving the dots permanently un-animated.
+      flowEl.classList.add("toolflow-flow--play");
+      return;
+    }
+
+    var observer = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          flowEl.classList.add("toolflow-flow--play");
+          observer.unobserve(container);
+        });
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(container);
   }
 
   window.renderToolflow = function renderToolflow(elementId, steps) {
@@ -132,13 +170,19 @@
 
     var flowEl = document.createElement("div");
     flowEl.className = "toolflow-flow";
+    var dotIndex = 0;
     steps.forEach(function (step, index) {
       flowEl.appendChild(buildNode(step, index));
-      if (index < steps.length - 1) flowEl.appendChild(buildArrow());
+      if (index < steps.length - 1) {
+        flowEl.appendChild(buildDots(dotIndex));
+        dotIndex += 3;
+      }
     });
 
     container.innerHTML = "";
     container.appendChild(flowEl);
+
+    setupToolflowPlay(container, flowEl);
   };
 
   // ------------------------------------------------------------------
