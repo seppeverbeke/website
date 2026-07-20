@@ -1014,28 +1014,60 @@ body.mobile-nav-open { overflow: hidden; }
    surface, thin border, card shadow). Sits as a direct child of
    .case-phases (sibling to .case-phase), so it isn't squeezed to the 680px
    reading width. Nodes are logo + name only (no caption line). Populated
-   via js/toolflow.js (renderToolflow()).
+   via js/toolflow.js (renderToolflow()). .toolflow is card chrome only —
+   the actual flex layout lives on .toolflow-flow (fits-on-one-row / mobile
+   column) or .toolflow-rows (desktop serpentine, when js/toolflow.js
+   measures that the nodes wrap into more than one row).
    ========================================================================== */
 .toolflow {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--seppeverbeke-space-6);
   background: var(--seppeverbeke-surface);
   border: 1px solid var(--seppeverbeke-line);
   border-radius: var(--seppeverbeke-radius-card);
   box-shadow: var(--seppeverbeke-shadow-card);
   padding: var(--seppeverbeke-space-6) var(--seppeverbeke-space-5);
-  list-style: none;
+}
+.toolflow-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--seppeverbeke-space-6);
+  transform: translateY(var(--toolflow-parallax, 0px));
 }
 @media (min-width: 768px) {
-  .toolflow {
+  .toolflow-flow {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;
     justify-content: center;
     gap: var(--seppeverbeke-space-7) var(--seppeverbeke-space-5);
   }
+}
+/* Serpentine (desktop only — js/toolflow.js never builds this on mobile). */
+.toolflow-rows {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--seppeverbeke-space-8);
+  transform: translateY(var(--toolflow-parallax, 0px));
+}
+.toolflow-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--seppeverbeke-space-7) var(--seppeverbeke-space-5);
+}
+.toolflow-row--reverse { flex-direction: row-reverse; }
+.toolflow-connector {
+  position: absolute;
+  overflow: visible;
+  color: var(--seppeverbeke-lavender-300);
+  pointer-events: none;
+}
+.toolflow-connector-path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
 }
 .toolflow-node {
   display: flex;
@@ -1062,6 +1094,7 @@ body.mobile-nav-open { overflow: hidden; }
   background: var(--seppeverbeke-lavender-100);
   flex-shrink: 0;
   overflow: hidden;
+  transition: transform 180ms ease-out;
 }
 .toolflow-icon img {
   width: 56px;
@@ -1077,10 +1110,23 @@ body.mobile-nav-open { overflow: hidden; }
   color: var(--seppeverbeke-lavender-700);
 }
 @media (hover: hover) and (pointer: fine) {
-  .toolflow-node:hover .toolflow-icon img,
-  .toolflow-node:focus-visible .toolflow-icon img {
+  .toolflow-node:hover .toolflow-icon img {
     filter: grayscale(0);
   }
+  .toolflow-node:hover .toolflow-icon {
+    transform: scale(1.1);
+  }
+}
+/* Keyboard focus and the text-step ↔ node hover coupling (js/toolflow.js
+   initToolflowSync) both work the same regardless of hover capability, so
+   they sit outside the (hover: hover) gate above. */
+.toolflow-node:focus-visible .toolflow-icon img,
+.toolflow-node--linked .toolflow-icon img {
+  filter: grayscale(0);
+}
+.toolflow-node:focus-visible .toolflow-icon,
+.toolflow-node--linked .toolflow-icon {
+  transform: scale(1.1);
 }
 .toolflow-name {
   font-family: var(--seppeverbeke-font-body);
@@ -1089,6 +1135,8 @@ body.mobile-nav-open { overflow: hidden; }
   color: var(--seppeverbeke-ink-900);
 }
 .toolflow-arrow {
+  position: relative;
+  overflow: visible;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1102,7 +1150,111 @@ body.mobile-nav-open { overflow: hidden; }
 .toolflow-arrow svg { width: 26px; height: 26px; }
 @media (prefers-reduced-motion: reduce) {
   .toolflow-icon img { transition: none; }
+  .toolflow-node:hover .toolflow-icon,
+  .toolflow-node:focus-visible .toolflow-icon,
+  .toolflow-node--linked .toolflow-icon {
+    transform: none;
+  }
 }
+
+/* One-time "data flowing through the pipe" spark, played once when the
+   diagram scrolls into view (js/toolflow.js toggles .toolflow--flow-play).
+   Skipped outright under prefers-reduced-motion (component never adds the
+   class), so no separate override is needed here. */
+.toolflow-spark {
+  position: absolute;
+  top: 50%;
+  left: -10%;
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: var(--seppeverbeke-lavender-500);
+  box-shadow: 0 0 8px 2px rgba(138, 120, 201, 0.55);
+  opacity: 0;
+  pointer-events: none;
+}
+.toolflow--flow-play .toolflow-spark {
+  animation: toolflow-spark-flow-h 600ms ease-out forwards;
+  animation-delay: calc(var(--flow-index, 0) * 220ms);
+}
+@keyframes toolflow-spark-flow-h {
+  0% { left: -10%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { left: 110%; opacity: 0; }
+}
+.toolflow-connector-spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--seppeverbeke-lavender-500);
+  box-shadow: 0 0 8px 2px rgba(138, 120, 201, 0.55);
+  opacity: 0;
+  pointer-events: none;
+}
+.toolflow--flow-play .toolflow-connector-spark {
+  animation: toolflow-spark-flow-path 700ms ease-out forwards;
+  animation-delay: calc(var(--flow-index, 0) * 220ms);
+}
+@keyframes toolflow-spark-flow-path {
+  0% { offset-distance: 0%; opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+/* Numbered text-step list (js/toolflow.js renderToolflowSteps()), rendered
+   from the same data as the diagram above and cross-highlighted with it
+   via matching data-step (js/toolflow.js initToolflowSync()). */
+.toolflow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--seppeverbeke-space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.toolflow-step {
+  display: flex;
+  gap: var(--seppeverbeke-space-3);
+  align-items: flex-start;
+  padding: var(--seppeverbeke-space-3);
+  margin-left: calc(-1 * var(--seppeverbeke-space-3));
+  margin-right: calc(-1 * var(--seppeverbeke-space-3));
+  border-radius: var(--seppeverbeke-radius-card);
+  border-left: 2px solid transparent;
+  transition: background var(--seppeverbeke-transition), border-color var(--seppeverbeke-transition);
+}
+.toolflow-step-num {
+  flex-shrink: 0;
+  width: 22px;
+  padding-top: 2px;
+  font-family: var(--seppeverbeke-font-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--seppeverbeke-lavender-300);
+}
+.toolflow-step-body { min-width: 0; }
+.toolflow-step-name {
+  display: block;
+  font-weight: 600;
+  color: var(--seppeverbeke-ink-900);
+  margin-bottom: var(--seppeverbeke-space-1);
+}
+.toolflow-step-text {
+  margin: 0;
+  color: var(--seppeverbeke-ink-500);
+  transition: color var(--seppeverbeke-transition);
+}
+.toolflow-step--linked {
+  background: var(--seppeverbeke-lavender-100);
+  border-left-color: var(--seppeverbeke-lavender-500);
+}
+.toolflow-step--linked .toolflow-step-text { color: var(--seppeverbeke-ink-900); }
 
 /* ==========================================================================
    CTA banner

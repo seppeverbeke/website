@@ -65,19 +65,6 @@
       </div>
     </section>
 
-    <section class="section container">
-      <div class="browser-mockup reveal">
-        <div class="browser-mockup-bar">
-          <span class="browser-mockup-dot"></span>
-          <span class="browser-mockup-dot"></span>
-          <span class="browser-mockup-dot"></span>
-        </div>
-        <div class="browser-mockup-body">
-          <div class="browser-mockup-placeholder">Visual volgt</div>
-        </div>
-      </div>
-    </section>
-
     <section class="section container case-narrative-section case-narrative-first">
       <div class="case-phases reveal">
         <div class="case-phase">
@@ -99,10 +86,11 @@
       <div class="case-phases reveal">
         <div class="case-phase">
           <span class="case-phase-label">02 · Aanpak</span>
+          <p>In plaats van een los prospectietool naast zijn bestaande CRM te zetten, kozen we ervoor om het volledige proces rechtstreeks aan Odoo te koppelen:</p>
         </div>
         <div id="linkedin-toolflow"></div>
         <div class="case-phase">
-          <p>In plaats van een los prospectietool naast zijn bestaande CRM te zetten, kozen we ervoor om het volledige proces rechtstreeks aan Odoo te koppelen. Persona's worden er gedefinieerd, Sales Navigator zoekt de bijhorende leadlijsten op, Claude stelt voor elk profiel een bericht op maat op, en Dux Soup voert het effectieve contact uit: connectieverzoek en bericht. Binnenkomende reacties filtert Claude opnieuw, deze keer om enkel de warme, positieve antwoorden eruit te halen, die automatisch in Odoo terechtkomen en de verkoper een melding geven.</p>
+          <ol id="linkedin-toolflow-steps"></ol>
         </div>
       </div>
     </section>
@@ -186,14 +174,46 @@
   <script src="/js/main.js"></script>
   <script src="/js/toolflow.js"></script>
   <script>
-    renderToolflow('linkedin-toolflow', [
-      { name: "Odoo", logo: "/images/tools/odoo.png" },
-      { name: "Sales Navigator", logo: "/images/tools/sales-navigator.png" },
-      { name: "Claude", logo: "/images/tools/claude.webp" },
-      { name: "Dux Soup", logo: "/images/tools/dux-soup.png" },
-      { name: "Claude", logo: "/images/tools/claude.webp" },
-      { name: "Odoo", logo: "/images/tools/odoo.png" }
-    ]);
+    // Single source of truth for the "02 · Aanpak" flow: powers both the
+    // toolflow diagram and the numbered step list, kept in sync via
+    // matching data-step identifiers. Edit step text here only — nothing
+    // below is hardcoded into the layout.
+    var linkedinFlowSteps = [
+      {
+        name: "Odoo",
+        logo: "/images/tools/odoo.png",
+        text: "In Odoo leggen we vast welk type bedrijf en profiel de klant precies wil bereiken."
+      },
+      {
+        name: "Sales Navigator",
+        logo: "/images/tools/sales-navigator.png",
+        text: "Op basis van die persona's zoekt Sales Navigator de bijhorende leadlijsten op LinkedIn op."
+      },
+      {
+        name: "Claude",
+        logo: "/images/tools/claude.webp",
+        text: "Voor elk profiel stelt Claude een persoonlijk bericht op, afgestemd op de functie en het bedrijf van de prospect."
+      },
+      {
+        name: "Dux Soup",
+        logo: "/images/tools/dux-soup.png",
+        text: "Dux Soup voert het effectieve contact uit: het connectieverzoek en het bericht worden automatisch verstuurd."
+      },
+      {
+        name: "Claude",
+        logo: "/images/tools/claude.webp",
+        text: "Binnenkomende reacties leest Claude opnieuw, deze keer om enkel de warme, positieve antwoorden eruit te halen."
+      },
+      {
+        name: "Odoo",
+        logo: "/images/tools/odoo.png",
+        text: "Die positieve reacties komen automatisch in Odoo terecht, met een melding voor de verkoper die de opvolging overneemt."
+      }
+    ];
+
+    renderToolflow('linkedin-toolflow', linkedinFlowSteps);
+    renderToolflowSteps('linkedin-toolflow-steps', linkedinFlowSteps);
+    initToolflowSync('linkedin-toolflow', 'linkedin-toolflow-steps');
   </script>
 </body>
 </html>
