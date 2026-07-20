@@ -1102,8 +1102,8 @@ body.mobile-nav-open { overflow: hidden; }
   }
 }
 .toolflow-icon img {
-  width: 54%;
-  height: 54%;
+  width: 68%;
+  height: 68%;
   object-fit: contain;
 }
 .toolflow-icon--fallback {
