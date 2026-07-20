@@ -1010,16 +1010,22 @@ body.mobile-nav-open { overflow: hidden; }
 
 /* ==========================================================================
    Toolflow — reusable tool-node sequence for case-page "02 · Aanpak" steps.
-   Sits as a direct child of .case-phases (sibling to .case-phase), same
-   pattern as .process-strip above, so it isn't squeezed to the 680px
-   reading width. Populated via js/toolflow.js (renderToolflow()).
+   Framed as its own card, same chrome as .process-strip above (white
+   surface, thin border, card shadow). Sits as a direct child of
+   .case-phases (sibling to .case-phase), so it isn't squeezed to the 680px
+   reading width. Nodes are logo + name only (no caption line). Populated
+   via js/toolflow.js (renderToolflow()).
    ========================================================================== */
 .toolflow {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--seppeverbeke-space-4);
-  margin-top: var(--seppeverbeke-space-5);
+  gap: var(--seppeverbeke-space-6);
+  background: var(--seppeverbeke-surface);
+  border: 1px solid var(--seppeverbeke-line);
+  border-radius: var(--seppeverbeke-radius-card);
+  box-shadow: var(--seppeverbeke-shadow-card);
+  padding: var(--seppeverbeke-space-6) var(--seppeverbeke-space-5);
   list-style: none;
 }
 @media (min-width: 768px) {
@@ -1027,15 +1033,16 @@ body.mobile-nav-open { overflow: hidden; }
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: var(--seppeverbeke-space-5) var(--seppeverbeke-space-3);
+    justify-content: center;
+    gap: var(--seppeverbeke-space-7) var(--seppeverbeke-space-5);
   }
 }
 .toolflow-node {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--seppeverbeke-space-2);
-  width: 140px;
+  gap: var(--seppeverbeke-space-3);
+  width: 160px;
   flex-shrink: 0;
   text-align: center;
   border-radius: var(--seppeverbeke-radius-card);
@@ -1049,23 +1056,23 @@ body.mobile-nav-open { overflow: hidden; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   background: var(--seppeverbeke-lavender-100);
   flex-shrink: 0;
   overflow: hidden;
 }
 .toolflow-icon img {
-  width: 34px;
-  height: 34px;
+  width: 56px;
+  height: 56px;
   object-fit: contain;
   filter: grayscale(1);
   transition: filter 250ms ease-out;
 }
 .toolflow-icon--fallback {
   font-family: var(--seppeverbeke-font-mono);
-  font-size: 14px;
+  font-size: 22px;
   font-weight: 500;
   color: var(--seppeverbeke-lavender-700);
 }
@@ -1078,10 +1085,9 @@ body.mobile-nav-open { overflow: hidden; }
 .toolflow-name {
   font-family: var(--seppeverbeke-font-body);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--seppeverbeke-ink-900);
 }
-.toolflow-desc { font-size: 13px; color: var(--seppeverbeke-ink-500); line-height: 1.4; }
 .toolflow-arrow {
   display: flex;
   align-items: center;
@@ -1091,9 +1097,9 @@ body.mobile-nav-open { overflow: hidden; }
   transform: rotate(90deg);
 }
 @media (min-width: 768px) {
-  .toolflow-arrow { transform: none; margin-top: 22px; }
+  .toolflow-arrow { transform: none; margin-top: 40px; }
 }
-.toolflow-arrow svg { width: 20px; height: 20px; }
+.toolflow-arrow svg { width: 26px; height: 26px; }
 @media (prefers-reduced-motion: reduce) {
   .toolflow-icon img { transition: none; }
 }
@@ -1582,6 +1588,24 @@ body.mobile-nav-open { overflow: hidden; }
   gap: var(--seppeverbeke-space-2);
   margin-top: var(--seppeverbeke-space-3);
 }
+
+/* One-phase-per-section narrative: each phase (incl. an untitled "korte
+   samenvatting" step) needs to be its own top-level <section> so the
+   sitewide scroll-indicator gives it its own dot, but the connecting
+   .case-phases line still has to read as one unbroken line across those
+   section boundaries. Trick: strip the sections' own padding-block to 0 so
+   they stack flush (zero gap → the border-left segments touch perfectly),
+   and move the rhythm/breathing room *inside* the border via padding-top
+   on the first child of .case-phases instead — the line stays visible
+   through that padding since it belongs to the full-height wrapper. */
+.case-narrative-section { padding-block: 0; }
+.case-narrative-section .case-phases > :first-child { padding-top: var(--seppeverbeke-space-7); }
+.case-narrative-first .case-phases > :first-child { padding-top: 0; }
+
+/* Same tight rhythm continued below the narrative (Voor wie / Gerelateerde
+   cases / CTA), so the gap there matches the phase-to-phase spacing above
+   instead of falling back to the much larger default --section-padding. */
+.case-tight-section { padding-block: 0; margin-top: var(--seppeverbeke-space-7); }
 
 /* ==========================================================================
    Utilities

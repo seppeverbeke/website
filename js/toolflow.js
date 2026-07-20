@@ -1,14 +1,16 @@
 // ==========================================================================
 // Toolflow component — reusable horizontal (desktop) / vertical (mobile)
-// sequence of tool nodes connected by arrows, for the "02 · Aanpak" section
-// of portfolio case pages. See css/style.css for the .toolflow* rules.
+// sequence of tool nodes connected by arrows, framed in a card, for the
+// "02 · Aanpak" section of portfolio case pages. Each node shows only a
+// logo + tool name (no caption line). See css/style.css for the .toolflow*
+// rules.
 //
 // Usage:
 //   <div id="my-toolflow"></div>
 //   <script src="/js/toolflow.js"></script>
 //   <script>
 //     renderToolflow('my-toolflow', [
-//       { name: "Odoo", logo: "/images/tools/odoo.png", description: "Persona's definiëren" },
+//       { name: "Odoo", logo: "/images/tools/odoo.png" },
 //       ...
 //     ]);
 //   </script>
@@ -65,16 +67,10 @@
     name.className = "toolflow-name";
     name.textContent = step.name || "";
 
-    var desc = document.createElement("p");
-    desc.className = "toolflow-desc";
-    desc.textContent = step.description || "";
-
     node.appendChild(icon);
     node.appendChild(name);
-    node.appendChild(desc);
 
-    var label = step.description ? step.name + ": " + step.description : step.name;
-    if (label) node.setAttribute("aria-label", label);
+    if (step.name) node.setAttribute("aria-label", step.name);
 
     return node;
   }

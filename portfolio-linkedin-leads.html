@@ -62,9 +62,6 @@
         <span class="eyebrow" style="display:block; margin-top: var(--seppeverbeke-space-4);">Sales &amp; marketing · Automatisatie</span>
         <h1>LinkedIn lead-automatisatie</h1>
         <p class="lede" style="margin-top: var(--seppeverbeke-space-4);">Een automatisatie die potentiële leads identificeert op LinkedIn, automatisch een persoonlijk bericht stuurt, en de lead vervolgens toevoegt aan het CRM, zonder handmatige opvolging.</p>
-        <div class="case-headline-stat">
-          <p class="case-headline-stat-number">Honderden contactmomenten per week</p>
-        </div>
       </div>
     </section>
 
@@ -81,32 +78,36 @@
       </div>
     </section>
 
-    <section class="section container">
-      <div class="case-body reveal">
-        <p>Automatische opvolging van warme LinkedIn-leads</p>
+    <section class="section container case-narrative-section case-narrative-first">
+      <div class="case-phases reveal">
+        <div class="case-phase">
+          <p>Automatische opvolging van warme LinkedIn-leads</p>
+        </div>
       </div>
     </section>
 
-    <section class="section container">
+    <section class="section container case-narrative-section">
       <div class="case-phases reveal">
         <div class="case-phase">
-          <span class="case-phase-label">01 · Vertrekpunt</span>
+          <span class="case-phase-label">01 · Probleem</span>
           <p>De klant wist exact welke bedrijven en profielen hij wilde bereiken, maar had simpelweg de tijd niet om elke prospect manueel aan te schrijven via LinkedIn of op te volgen via cold calling. Van de reacties die wél binnenkwamen, ging het overzicht verloren: welke organisaties toonden nu precies interesse, en welk gesprek verdiende opvolging?</p>
         </div>
       </div>
     </section>
 
-    <section class="section container">
+    <section class="section container case-narrative-section">
       <div class="case-phases reveal">
         <div class="case-phase">
           <span class="case-phase-label">02 · Aanpak</span>
-          <p>In plaats van een los prospectietool naast zijn bestaande CRM te zetten, kozen we ervoor om het volledige proces rechtstreeks aan Odoo te koppelen. Persona's worden er gedefinieerd, Sales Navigator zoekt de bijhorende leadlijsten op, Claude stelt voor elk profiel een bericht op maat op, en Dux Soup voert het effectieve contact uit: connectieverzoek en bericht. Binnenkomende reacties filtert Claude opnieuw, deze keer om enkel de warme, positieve antwoorden eruit te halen, die automatisch in Odoo terechtkomen en de verkoper een melding geven.</p>
         </div>
         <div id="linkedin-toolflow"></div>
+        <div class="case-phase">
+          <p>In plaats van een los prospectietool naast zijn bestaande CRM te zetten, kozen we ervoor om het volledige proces rechtstreeks aan Odoo te koppelen. Persona's worden er gedefinieerd, Sales Navigator zoekt de bijhorende leadlijsten op, Claude stelt voor elk profiel een bericht op maat op, en Dux Soup voert het effectieve contact uit: connectieverzoek en bericht. Binnenkomende reacties filtert Claude opnieuw, deze keer om enkel de warme, positieve antwoorden eruit te halen, die automatisch in Odoo terechtkomen en de verkoper een melding geven.</p>
+        </div>
       </div>
     </section>
 
-    <section class="section container">
+    <section class="section container case-narrative-section">
       <div class="case-phases reveal">
         <div class="case-phase">
           <span class="case-phase-label">03 · Resultaat</span>
@@ -115,34 +116,32 @@
       </div>
     </section>
 
-    <section class="section container">
-      <div class="tile-grid reveal">
-        <div class="card">
-          <span class="eyebrow">Voor wie?</span>
-          <p>Sales- en marketingteams die structureel willen prospecteren op LinkedIn zonder elke stap handmatig te doen.</p>
-        </div>
-        <div class="card">
-          <span class="eyebrow">Gebruikte tools</span>
-          <div class="tool-tags">
-            <span class="badge">LinkedIn</span>
-            <span class="badge">CRM</span>
-          </div>
-        </div>
+    <section class="section container case-tight-section">
+      <div class="card reveal">
+        <span class="eyebrow">Voor wie?</span>
+        <p>Sales- en marketingteams die structureel willen prospecteren op LinkedIn zonder elke stap handmatig te doen.</p>
       </div>
     </section>
 
-    <section class="section container">
+    <section class="section container case-tight-section">
       <div class="section-head reveal">
-        <span class="eyebrow">Gerelateerde case</span>
+        <span class="eyebrow">Gerelateerde cases</span>
       </div>
-      <a href="/portfolio-plaud-microsoft.html" class="card reveal" style="max-width:640px; display:block;">
-        <span class="eyebrow">Automatisatie</span>
-        <h3>Plaud to Microsoft automatisatie</h3>
-        <p>Vergaderingen en telefoongesprekken automatisch opgenomen, getranscribeerd en verwerkt tot een gepolijst verslag.</p>
-      </a>
+      <div class="tile-grid">
+        <a href="/portfolio-plaud-microsoft.html" class="card reveal" style="display:block;">
+          <span class="eyebrow">Automatisatie</span>
+          <h3>Plaud to Microsoft automatisatie</h3>
+          <p>Vergaderingen en telefoongesprekken automatisch opgenomen, getranscribeerd en verwerkt tot een gepolijst verslag.</p>
+        </a>
+        <a href="/portfolio-tendr.html" class="card reveal" style="display:block;">
+          <span class="eyebrow">SaaS-platform</span>
+          <h3>Tendr</h3>
+          <p>Een complete aanbestedingsmanagement-tool die je met AI naar het ideale dossier begeleidt.</p>
+        </a>
+      </div>
     </section>
 
-    <section class="section container">
+    <section class="section container case-tight-section">
       <div class="cta-banner reveal">
         <span class="eyebrow" style="color:var(--seppeverbeke-lavender-300)">Vrijblijvend</span>
         <h2>Wil jij ook structureel meer contactmomenten op LinkedIn?</h2>
@@ -188,12 +187,12 @@
   <script src="/js/toolflow.js"></script>
   <script>
     renderToolflow('linkedin-toolflow', [
-      { name: "Odoo", logo: "/images/tools/odoo.png", description: "Persona's definiëren" },
-      { name: "Sales Navigator", logo: "/images/tools/sales-navigator.png", description: "Leadlijst opzoeken" },
-      { name: "Claude", logo: "/images/tools/claude.webp", description: "Bericht op maat" },
-      { name: "Dux Soup", logo: "/images/tools/dux-soup.png", description: "Verzendt en connecteert" },
-      { name: "Claude", logo: "/images/tools/claude.webp", description: "Filtert positieve reacties" },
-      { name: "Odoo", logo: "/images/tools/odoo.png", description: "Registreert lead, notifieert sales" }
+      { name: "Odoo", logo: "/images/tools/odoo.png" },
+      { name: "Sales Navigator", logo: "/images/tools/sales-navigator.png" },
+      { name: "Claude", logo: "/images/tools/claude.webp" },
+      { name: "Dux Soup", logo: "/images/tools/dux-soup.png" },
+      { name: "Claude", logo: "/images/tools/claude.webp" },
+      { name: "Odoo", logo: "/images/tools/odoo.png" }
     ]);
   </script>
 </body>
