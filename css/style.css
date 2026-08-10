@@ -2081,3 +2081,101 @@ html.js-soft-scroll-correcting {
     transition: none;
   }
 }
+
+/* ==========================================================================
+   Dot-grid utility — reusable version of the pattern already used by
+   .cta-banner--dots (see above) and .mobile-nav::before, extracted so any
+   element can opt in via a single class. --dot-grid-color defaults to the
+   dark-on-light variant (for cards/light surfaces like #contact-success);
+   override it locally for dark surfaces the way .cta-banner--dots does with
+   its own rule.
+   ========================================================================== */
+.dot-grid {
+  position: relative;
+  overflow: hidden;
+}
+.dot-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(var(--dot-grid-color, rgba(20, 21, 26, 0.06)) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+.dot-grid > * { position: relative; z-index: 1; }
+
+/* ==========================================================================
+   Dot-grid ripple (signature detail) — see js/ripple.js for the shared
+   triggerRipple() function. The overlay is appended as a child of whichever
+   .dot-grid / .cta-banner--dots element the ripple targets, so it inherits
+   that element's own dot-grid tiling (22px, same as GRID_SIZE in ripple.js).
+   ========================================================================== */
+.ripple-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.ripple-dot {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  margin: -1px 0 0 -1px;
+  border-radius: 50%;
+  background: var(--seppeverbeke-lavender-300);
+  opacity: 0;
+}
+.ripple-overlay:not(.ripple-overlay--uniform) .ripple-dot {
+  animation: ripple-dot-pulse 280ms ease-out both;
+  animation-delay: var(--ripple-delay, 0ms);
+}
+@keyframes ripple-dot-pulse {
+  0%, 100% {
+    transform: scale(1);
+    background-color: var(--seppeverbeke-lavender-300);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(2.3);
+    background-color: var(--seppeverbeke-lavender-500);
+    opacity: 0.9;
+  }
+}
+/* prefers-reduced-motion: every dot fades in/out together, no directional
+   wave and no per-dot movement — see reducedMotion() branch in ripple.js. */
+.ripple-overlay--uniform .ripple-dot {
+  animation: ripple-uniform-fade 320ms ease-out both;
+}
+@keyframes ripple-uniform-fade {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  40% {
+    transform: scale(1.6);
+    background-color: var(--seppeverbeke-lavender-500);
+    opacity: 0.7;
+  }
+}
+
+/* ==========================================================================
+   View Transitions — cross-document, MPA-native. Chrome/Edge apply the
+   @view-transition rule automatically on qualifying same-origin
+   navigations; browsers without support (Firefox, Safari) simply ignore
+   this whole block and navigate normally, so no JS fallback branch is
+   needed anywhere on the site.
+   ========================================================================== */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 260ms;
+  animation-timing-function: ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

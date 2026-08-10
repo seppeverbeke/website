@@ -300,6 +300,12 @@ if (contactForm) {
     event.preventDefault();
     contactError.style.display = 'none';
 
+    // Captured before the form (and its submit button) is hidden below, so
+    // the dot-grid ripple triggered on success (trigger #2 — see
+    // js/ripple.js) still knows where the button was.
+    const submitBtn = contactForm.querySelector('button[type="submit"]');
+    const submitBtnRect = submitBtn ? submitBtn.getBoundingClientRect() : null;
+
     const formData = Object.fromEntries(new FormData(contactForm));
     fetch('/', {
       method: 'POST',
@@ -312,6 +318,13 @@ if (contactForm) {
         requestAnimationFrame(() => contactSuccess.classList.add('is-visible'));
         contactSuccess.setAttribute('tabindex', '-1');
         contactSuccess.focus();
+        if (typeof window.triggerRipple === 'function' && submitBtnRect) {
+          window.triggerRipple(
+            submitBtnRect.left + submitBtnRect.width / 2,
+            submitBtnRect.top + submitBtnRect.height / 2,
+            contactSuccess
+          );
+        }
       })
       .catch(() => {
         contactError.style.display = 'block';
@@ -476,6 +489,23 @@ if (contactForm) {
     sections.forEach((section) => sectionObserver.observe(section));
   }
 })();
+
+// Dot-grid ripple trigger #1 — clicking the lavender dot in the
+// "seppeverbeke." wordmark sends a ripple through the nearest visible
+// dot-grid pattern on the page (see js/ripple.js). Scoped to real .wordmark
+// links only (header logo + footer brand line), not the decorative,
+// aria-hidden .footer-signature-text. Scoped further to the dot itself
+// (not the whole logo link) so clicking anywhere else on the wordmark still
+// navigates home as normal — only a precise click on the dot cancels that
+// navigation to play the ripple instead.
+document.querySelectorAll('.wordmark .wordmark-dot').forEach((dot) => {
+  dot.addEventListener('click', (event) => {
+    if (typeof window.triggerRipple !== 'function') return;
+    event.preventDefault();
+    event.stopPropagation();
+    window.triggerRipple(event.clientX, event.clientY);
+  });
+});
 
 // Cursor-following glow — desktop-only, one-off detail on the homepage's
 // gratis-intake card. Not reused anywhere else on the site.
