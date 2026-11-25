@@ -480,6 +480,7 @@ body::after {
   overflow-x: clip; /* niet hidden: dat maakt een scrollcontainer en breekt de sticky balk */
 }
 .tab-panel.active { display: block; }
+#panel-card { padding-left: 6px; padding-right: 6px; }
 .tab-panel.active.from-right { animation: slideFromRight 280ms ease-out; }
 .tab-panel.active.from-left { animation: slideFromLeft 280ms ease-out; }
 @keyframes slideFromRight { from { transform: translateX(32px); opacity: 0; } to { transform: none; opacity: 1; } }
@@ -494,8 +495,8 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  margin: -14px -12px 10px;
-  padding: 8px 12px;
+  margin: -14px -6px 10px;
+  padding: 8px 10px;
   font-family: var(--font-mono);
   /* blijft bovenaan staan, zodat "Deel uit" altijd bereikbaar is */
   position: sticky;
@@ -511,7 +512,7 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
 .card-grid {
   display: grid;
   grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
-  gap: 4px;
+  gap: 3px;
   margin-bottom: 16px;
   -webkit-user-select: none;
   user-select: none;
@@ -523,7 +524,7 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
   position: relative;
   display: flex;
   background: var(--paper);
-  border: 1.5px solid var(--black);
+  border: 1px solid var(--black);
   border-radius: 3px;
   min-width: 0;
   touch-action: manipulation;
@@ -537,7 +538,7 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
   content: "";
   flex: none;
   width: 0;
-  padding-top: 125%;
+  padding-top: 92%;
 }
 
 .cell.type-personal { background: var(--khaki); }
@@ -553,8 +554,8 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  padding: 5px 2px;
+  gap: 2px;
+  padding: 4px 1px;
   text-align: center;
 }
 
@@ -568,17 +569,18 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
   color: var(--khaki-light);
 }
 
-.cell-icon { font-size: 18px; line-height: 1; display: block; }
+.cell-icon { font-size: 14px; line-height: 1; display: block; }
 
 .cell-text {
-  font-size: clamp(9.5px, 2.75vw, 11.5px);
+  font-size: clamp(11.5px, 3.07vw, 12.5px);
   line-height: 1.22;
   color: var(--ink);
   max-width: 100%;
+  /* breken op woordgrenzen; midden in een woord alleen als het woord echt niet past */
   overflow-wrap: break-word;
-  -webkit-hyphens: auto;
-  hyphens: auto;
-  hyphenate-limit-chars: 7 3 3;
+  word-break: normal;
+  -webkit-hyphens: none;
+  hyphens: none;
 }
 
 .about-you-label {
