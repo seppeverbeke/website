@@ -105,10 +105,6 @@ export const BRIEFING = {
       heading: "UITRUSTING",
       items: ["Warme, waterdichte kledij", "Goeie schoenen", "Identiteitskaart", "Opgeladen gsm"],
     },
-    {
-      heading: "VOORBEREIDING",
-      items: ["Je persoonlijke code krijg je op de dag zelf."],
-    },
   ],
 };
 
