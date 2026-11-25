@@ -37,7 +37,7 @@ export const CARD = {
 // Neutrale stop-id's, enkel om activiteitenvakjes te verdelen. De echte
 // naam/icoon/uur van elke stop staat server-side (secret_stops) en is
 // enkel zichtbaar voor de spelleider via het admin-paneel.
-export const STOP_IDS = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"];
+export const STOP_IDS = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"];
 
 // Vakjes
 // type: "general"  = kan op elke kaart
@@ -47,7 +47,7 @@ export const STOP_IDS = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8"];
 // id: vast en uniek, nooit hergebruiken (wordt zo opgeslagen in Supabase)
 export const CELLS = [
   // ---- algemeen ----
-  { id: "g01", type: "general", icon: "💤", text: "Iemand valt in slaap" },
+  { id: "g01", type: "general", icon: "💤", text: "Iemand slaapt op de trein" },
   { id: "g02", type: "general", icon: "🚗", text: "De 2CV valt stil" },
   { id: "g03", type: "general", icon: "↩️", text: "Foute weg ingeslagen" },
   { id: "g04", type: "general", icon: "🇩🇪", text: "Iemand doet een Duits accent" },
@@ -56,25 +56,33 @@ export const CELLS = [
   { id: "g07", type: "general", icon: "💦", text: "Iemand morst zijn drank" },
   { id: "g08", type: "general", icon: "💼", text: "Iemand begint over het werk" },
   { id: "g09", type: "general", icon: "🔁", text: "Iemand vertelt een verhaal dat iedereen al kent" },
-  { id: "g10", type: "general", icon: "🔍", text: "Iemand verliest of vergeet iets" },
-  { id: "g11", type: "general", icon: "🚴", text: "Iemand vloekt op een fietser" },
-  { id: "g12", type: "general", icon: "🎶", text: "Iemand zingt een liedje mee" },
-  { id: "g13", type: "general", icon: "🤕", text: "Iemand stoot zijn hoofd" },
-  { id: "g14", type: "general", icon: "🗣️", text: "Iemand begint te praten tegen een wildvreemde" },
-  { id: "g15", type: "general", icon: "💥", text: "Iemand doet een gevechtsgeluid na" },
-  { id: "g16", type: "general", icon: "🧭", text: "Iemand loopt de groep kwijt" },
+  { id: "g17", type: "general", icon: "🤳", text: "Iemand neemt een selfie" },
+  { id: "g18", type: "general", icon: "🎒", text: "Iemand laat iets liggen of vergeet iets" },
+  { id: "g19", type: "general", icon: "📱", text: "Iemand toont een meme of een Instagram-filmpje" },
+  { id: "g20", type: "general", icon: "🌳", text: "Iemand plast wild" },
+  { id: "g21", type: "general", icon: "🗣️", text: "Iemand zegt \"Venske\" of \"Gregn B\"" },
+  { id: "g22", type: "general", icon: "🤮", text: "Een drankje komt er terug uit" },
+  { id: "g23", type: "general", icon: "💋", text: "Iemand vertelt over het kussen van Maureen" },
 
-  // ---- persoonlijk ----
+  // ---- persoonlijk (nooit op de eigen kaart) ----
   { id: "p01", type: "personal", about: "dennus", icon: "🍺", text: "Dennus drinkt een drankje ad fundum" },
-  { id: "p02", type: "personal", about: "dennus", icon: "📺", text: "Dennus vertelt over een BV die klant is of wordt" },
+  { id: "p05", type: "personal", about: "dennus", icon: "🎶", text: "Dennus zingt een liedje mee" },
+  { id: "p06", type: "personal", about: "dennus", icon: "🗯️", text: "Dennus zegt \"Valla valla\"" },
   { id: "p03", type: "personal", about: "spriet", icon: "📜", text: "Spriet vertelt een weetje over de oorlog" },
+  { id: "p07", type: "personal", about: "spriet", icon: "❓", text: "Spriet zegt \"Wie mist er nekeer niet?\"" },
+  { id: "p08", type: "personal", about: "spriet", icon: "👬", text: "Spriet begint over de broers" },
   { id: "p04", type: "personal", about: "kruidn", icon: "📸", text: "Kruidn babbelt over een (Instagram)model of actrice" },
-  // TODO: meer persoonlijke vakjes over seppe, spriet, kruidn
+  { id: "p09", type: "personal", about: "kruidn", icon: "🔵", text: "Kruidn begint over Club Brugge" },
+  { id: "p10", type: "personal", about: "kruidn", icon: "🥤", text: "Kruidn drinkt een frisdrank zonder reden" },
+  { id: "p11", type: "personal", about: "seppe",  icon: "🔴", text: "Seppe begint over Arsenal" },
+  { id: "p12", type: "personal", about: "seppe",  icon: "🧭", text: "Seppe zegt \"Zuid\"" },
+  { id: "p13", type: "personal", about: "seppe",  icon: "🌾", text: "Seppe zegt dat het is omdat hij geen boeren kan laten" },
 
   // ---- activiteiten (vergrendeld, tekst/icoon staan server-side) ----
   { id: "a01", type: "activity", stop: "s3" },
   { id: "a02", type: "activity", stop: "s7" },
-  // TODO: minstens 1 per stop
+  { id: "a03", type: "activity", stop: "s8" },
+  { id: "a04", type: "activity", stop: "s9" },
 ];
 
 // =====================================================================
