@@ -492,10 +492,12 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
 .card-stats {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
+  gap: 10px;
   margin-bottom: 12px;
   font-family: var(--font-mono);
 }
+.card-stats-left { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .card-stats .count { font-size: 22px; color: var(--khaki-light); }
 .card-stats .lines { font-size: 13px; color: var(--khaki); }
 
@@ -1384,17 +1386,6 @@ body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
 .dogtag-rank { font-size: 14px; letter-spacing: 0.08em; line-height: 1.35; padding-top: 10px; border-top: 2px solid rgba(0, 0, 0, 0.18); box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.6); }
 .dogtag-specialty { font-size: 12px; letter-spacing: 0.04em; line-height: 1.45; font-weight: 500; }
 
-/* ---------- insigne ---------- */
-.rank-badge { display: inline-flex; width: 24px; height: 24px; flex: none; }
-.rank-badge.header-badge { margin-right: -2px; }
-.rank-svg { width: 100%; height: 100%; overflow: visible; }
-.rank-frame { fill: rgba(21, 23, 13, 0.55); stroke: var(--khaki); stroke-width: 1.6; stroke-dasharray: 3 1.6; }
-.rank-chev { fill: none; stroke: var(--khaki-light); stroke-width: 2.6; stroke-linecap: square; stroke-linejoin: miter; }
-.rank-star { fill: var(--khaki-light); stroke: var(--khaki-light); stroke-width: 0.6; stroke-linejoin: round; }
-.rank-dot { fill: none; stroke: var(--khaki); stroke-width: 2; }
-.board-name .rank-badge { width: 22px; height: 22px; }
-.board-label { white-space: nowrap; }
-
 /* ---------- alleen-lezen ---------- */
 .readonly-note {
   font-family: var(--font-mono);
@@ -1524,3 +1515,131 @@ body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
   margin-top: 10px;
   text-decoration: none;
 }
+
+
+/* =====================================================================
+   DRANKBONNEN
+   ===================================================================== */
+.drink-btn {
+  min-height: var(--tap);
+  padding: 0 14px;
+  background: var(--khaki);
+  color: var(--black);
+  border: 1.5px solid var(--black);
+  border-radius: 3px;
+  box-shadow: 0 3px 0 var(--black);
+  font-family: var(--font-stencil);
+  font-size: 15px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  flex: none;
+}
+.drink-btn:active:not(:disabled) { box-shadow: 0 1px 0 var(--black); }
+.drink-btn:disabled {
+  background: #3b3d2e;
+  color: #a8a48c;
+  border-color: #23251a;
+  box-shadow: none;
+}
+
+.sheet .give-target { min-height: 60px; font-size: 20px; max-width: none; }
+
+.bon-fly {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 260;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  border: 2px dashed var(--ink);
+  border-radius: 4px;
+  font-size: 20px;
+  line-height: 1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* bevel: grote melding bij de ontvanger */
+.order-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 350;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(52, 8, 8, 0.9);
+  animation: fadeIn 160ms ease-out;
+}
+.order-card {
+  width: 100%;
+  max-width: 340px;
+  padding: 26px 18px 22px;
+  text-align: center;
+  background: rgba(21, 23, 13, 0.55);
+  border: 5px solid var(--red-bright);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  transform: rotate(-3deg);
+}
+.order-title {
+  font-family: var(--font-stencil);
+  font-weight: 700;
+  font-size: clamp(30px, 10.5vw, 52px);
+  line-height: 1;
+  letter-spacing: 0.04em;
+  color: var(--red-bright);
+  text-shadow: 2px 2px 0 var(--black);
+}
+.order-from {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  letter-spacing: 0.1em;
+  color: var(--khaki-light);
+  text-transform: uppercase;
+}
+.order-btn { margin-top: 10px; }
+
+/* scorebord en generiek */
+.board-drinks {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--khaki-light);
+}
+.credits-awards { display: flex; flex-direction: column; gap: 18px; margin: 4px 0 26px; }
+.credits-award { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.credits-award-name {
+  font-family: var(--font-stencil);
+  font-size: clamp(22px, 7vw, 32px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .order-overlay { animation: none !important; }
+}
+
+/* eindkaart compacter, nu er titels bij zijn */
+.credits-final .credits-winner-name { font-size: clamp(26px, 8vw, 34px); }
+.credits-final .credits-awards { gap: 10px; margin: 0 0 12px; }
+.credits-final .credits-award-name { font-size: 20px; }
+.credits-final .credits-row {
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  max-width: 330px;
+  margin: 0 auto 8px;
+}
+.credits-final .credits-detail { font-size: 11px; text-align: right; }
+.credits-final .credits-name { font-size: 15px; }

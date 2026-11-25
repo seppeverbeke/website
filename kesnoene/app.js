@@ -5,7 +5,7 @@
 // zodra de server het toelaat (RLS + rpc's, zie supabase.sql).
 // =====================================================================
 
-import { MISSION, PLAYERS, CARD, CELLS, RULES, BRIEFING, EASTER_EGGS as EE } from "./data.js";
+import { MISSION, PLAYERS, CARD, CELLS, RULES, BRIEFING, GAME, EASTER_EGGS as EE } from "./data.js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
 const SUPABASE_CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -247,14 +247,7 @@ function computeCompletedLines(grid, set) {
 const isFullCard = (grid, set) => grid.every((cell) => isCellTicked(cell, set));
 const playableTotal = () => CARD.size * CARD.size - (CARD.size === 5 ? 1 : 0);
 
-// rangen: de hoogste rang waarvan de drempel gehaald is
-function rankIndexFor(count, full) {
-  let idx = 0;
-  EE.ranks.forEach((r, i) => { if (r.fullCard ? full : count >= r.min) idx = i; });
-  return idx;
-}
 const tickedCount = (grid, set) => grid.filter((c) => c.type !== "free" && set.has(c.id)).length;
-const currentRankIdx = () => rankIndexFor(tickedCount(state.card, state.ticks), isFullCard(state.card, state.ticks));
 
 // ---------------------------------------------------------------------
 // state
@@ -274,8 +267,8 @@ const state = {
   seenEventIds: new Set(),
   maxEventId: 0,
   adminCode: null,
-  rankIdx: 0,            // rang die nu op het insigne staat
-  reportedRank: -1,      // hoogste rang die al gemeld is (per speler bewaard)
+  drinkEvents: new Map((lsGet("kesnoene_drinks", []) || []).map((d) => [d.id, d])),   // id -> { id, from, to }
+  bonSeen: 0,            // hoogste aantal verdiende bonnen dat al gemeld is (per speler bewaard)
   net: { serverOk: null },
 };
 
@@ -286,8 +279,8 @@ function loadPlayerState() {
   state.fullCardCelebrated = lsGet(pkey("fullcard"), false);
   state.card = buildCard(state.player.id);
   state.cellById = new Map(state.card.map((c) => [c.id, c]));
-  state.rankIdx = currentRankIdx();
-  state.reportedRank = lsGet(pkey("rank"), -1);
+  const storedBon = lsGet(pkey("bon"), null);
+  state.bonSeen = storedBon === null ? earnedBons() : storedBon;
 }
 const persistTicks = () => lsSet(pkey("ticks"), Array.from(state.ticks));
 const persistLines = () => lsSet(pkey("lines"), state.completedLines);
@@ -299,9 +292,9 @@ let queueVersion = 0;
 let queueCounter = 0;
 const getQueue = () => lsGet(pkey("queue"), []);
 function setQueue(q) { queueVersion++; lsSet(pkey("queue"), q); }
-function queueOp(op, cellId) {
+function queueOp(op, cellId, extra = {}) {
   const q = getQueue();
-  q.push({ uid: `${Date.now()}-${queueCounter++}`, op, cell_id: cellId });
+  q.push({ uid: `${Date.now()}-${queueCounter++}`, op, cell_id: cellId, ...extra });
   setQueue(q);
   flushQueue();
 }
@@ -379,6 +372,7 @@ async function startSync() {
   await refreshSecret({ animate: false });
   await syncOwnTicks();
   await loadFeed();
+  await loadDrinks();
   setupRealtime();
   scheduleNextOpening();
   synced = state.net.serverOk === true;
@@ -513,13 +507,18 @@ function handleRemoteReset() {
     state.fullCardCelebrated = false;
     persistTicks(); persistLines(); persistFull();
     setQueue([]);
-    state.reportedRank = -1;
-    lsSet(pkey("rank"), -1);
+    state.bonSeen = 0;
+    lsSet(pkey("bon"), 0);
+    lsRemove(pkey("ack"));
     refreshAllCells();
     updateCardStats();
-    silentRankSync();
   }
-  if (supabase) { refreshSecret({ animate: false }); loadFeed(); }
+  state.drinkEvents = new Map();
+  lsRemove("kesnoene_drinks");
+  orderQueue.length = 0;
+  orderIds.clear();
+  updateDrinkButton();
+  if (supabase) { refreshSecret({ animate: false }); loadFeed(); loadDrinks(); }
   if (currentTab === "scoreboard") renderScoreboard();
 }
 
@@ -531,7 +530,7 @@ async function syncOwnTicks() {
   if (error || !Array.isArray(data)) return;
   if (version !== queueVersion || flushing) return;
   const next = new Set(data.map((r) => r.cell_id));
-  for (const q of getQueue()) { if (q.op === "tick") next.add(q.cell_id); else next.delete(q.cell_id); }
+  for (const q of getQueue()) { if (q.op === "tick") next.add(q.cell_id); else if (q.op === "untick") next.delete(q.cell_id); }
   const same = next.size === state.ticks.size && [...next].every((id) => state.ticks.has(id));
   if (same) return;
   state.ticks = next;
@@ -541,7 +540,7 @@ async function syncOwnTicks() {
   persistLines(); persistFull();
   refreshAllCells();
   updateCardStats();
-  silentRankSync();
+  silentBonSync();
 }
 
 let flushing = false;
@@ -560,6 +559,10 @@ async function flushQueue() {
         if (!error) {
           try { await supabase.from("events").insert({ player: state.player.id, kind: "tick", payload: {} }); } catch (e) { /* niet kritiek */ }
         }
+      } else if (item.op === "drink") {
+        const res = await sb(supabase.from("events").insert({ player: state.player.id, kind: "drink", payload: { to: item.to } }).select());
+        error = res.error;
+        if (!error && Array.isArray(res.data)) ingestEvents(res.data, false);
       } else {
         ({ error } = await sb(supabase.from("ticks").delete().match({ player: state.player.id, cell_id: item.cell_id })));
       }
@@ -571,6 +574,7 @@ async function flushQueue() {
   } finally {
     flushing = false;
     updateConnIndicator();
+    updateDrinkButton();
   }
 }
 
@@ -641,7 +645,7 @@ function feedMessage(evt) {
   if (evt.kind === "bingo") return `🎉 ${who} heeft BINGO!`;
   if (evt.kind === "fullcard") return `🏆 ${who} heeft een VOLLEDIGE KAART!`;
   if (evt.kind === "unlock") return "🔓 Er is een vakje vrijgegeven";
-  if (evt.kind === "promotion") return fmt(EE.promotion.feed, { name: who, rank: (evt.payload || {}).rank });
+  if (evt.kind === "drink") return gameFmt(GT.givenToast, { from: who, to: nameOf((evt.payload || {}).to) });
   return null;
 }
 
@@ -649,6 +653,7 @@ function toastFor(evt) {
   const mine = state.player && evt.player === state.player.id;
   if (evt.kind === "unlock") { showToast("🔓 Nieuw vakje vrijgegeven"); return; }
   if (mine) return;
+  if (evt.kind === "drink" && (evt.payload || {}).to === (state.player && state.player.id)) return;   // de ontvanger krijgt het bevel
   const msg = feedMessage(evt);
   if (msg) showToast(msg);
 }
@@ -660,7 +665,11 @@ function ingestEvents(rows, live) {
     state.seenEventIds.add(e.id);
     state.maxEventId = Math.max(state.maxEventId, e.id);
     state.feedCache.push(e);
-    if (live) toastFor(e);
+    if (e.kind === "drink") addDrinkEvent(e);
+    if (live) {
+      toastFor(e);
+      if (e.kind === "drink" && state.player && (e.payload || {}).to === state.player.id) enqueueOrder(e);
+    }
   });
   state.feedCache.sort((a, b) => b.id - a.id);
   state.feedCache = state.feedCache.slice(0, 40);
@@ -1209,7 +1218,6 @@ function buildCardDOM() {
     grid.appendChild(el);
   });
   updateCardStats();
-  renderHeaderBadge();
   updateReadOnlyNote();
 }
 
@@ -1239,6 +1247,7 @@ function updateCardStats() {
   $("card-count").textContent = `${count} / ${playableTotal()}`;
   const lines = computeCompletedLines(state.card, state.ticks).length;
   $("card-lines").textContent = `${lines} ${lines === 1 ? "lijn" : "lijnen"}`;
+  updateDrinkButton();
 }
 
 // ----- animaties op de kaart -----
@@ -1357,6 +1366,7 @@ async function playUnlock(el, cell, content) {
 // ----- tikken en weghalen -----
 function tickCell(id) {
   if (state.ticks.has(id)) return;
+  lastTickedId = id;
   state.ticks.add(id);
   persistTicks();
   queueOp("tick", id);
@@ -1367,7 +1377,7 @@ function tickCell(id) {
   updateCardStats();
   showUndoBar(id);
   checkBingo();
-  checkRank();
+  checkBon();
 }
 
 function untickCell(id) {
@@ -1377,7 +1387,7 @@ function untickCell(id) {
   queueOp("untick", id);
   refreshCell(id);
   updateCardStats();
-  checkRank();
+  checkBon();
 }
 
 function handleCellTap(id) {
@@ -1540,7 +1550,7 @@ function renderRules() {
   const body = $("rules-body");
   if (!RULES || !RULES.length) { body.replaceChildren(h("p", "empty", "Nog geen regels toegevoegd.")); return; }
   const ul = h("ul");
-  RULES.forEach((r) => ul.appendChild(h("li", "", r)));
+  RULES.forEach((r) => ul.appendChild(h("li", "", gameFmt(r, { ticksPerBon: GAME.ticksPerBon, bonPerLine: GAME.bonPerLine }))));
   body.replaceChildren(ul);
 }
 $("rules-toggle").addEventListener("click", () => {
@@ -1558,9 +1568,8 @@ function createBoardRow(player) {
   const row = h("div", "board-row");
   const top = h("div", "board-row-top");
   const name = h("span", "board-name");
-  const badge = h("span", "rank-badge");
   const label = h("span", "board-label");
-  name.append(badge, label);
+  name.append(label);
   const meta = h("span", "board-meta");
   const odo = h("span", "odo");
   odo.append(h("span", "", "0"));
@@ -1571,8 +1580,9 @@ function createBoardRow(player) {
   const fill = h("div", "progress-bar-fill");
   fill.style.transform = "scaleX(0)";
   bar.append(fill);
-  row.append(top, bar);
-  row._parts = { name, badge, label, odo, rest, fill, player, rankIdx: -1 };
+  const drinks = h("div", "board-drinks");
+  row.append(top, bar, drinks);
+  row._parts = { name, label, odo, rest, fill, drinks, player };
   return row;
 }
 
@@ -1606,16 +1616,10 @@ function updateBoard(summaries, stale) {
     if (!row) { row = createBoardRow(s.player); boardRowEls.set(s.player.id, row); }
     const p = row._parts;
     p.label.textContent = `${i === 0 && s.count > 0 ? "👑 " : ""}${s.player.name}${s.full ? " 🏆" : ""}`;
-    if (p.rankIdx !== s.rankIdx) {
-      const rising = p.rankIdx !== -1 && s.rankIdx > p.rankIdx;
-      p.rankIdx = s.rankIdx;
-      p.badge.replaceChildren(rankBadgeSVG(EE.ranks[s.rankIdx]));
-      p.badge.setAttribute("aria-label", EE.ranks[s.rankIdx].name);
-      if (rising) pinBadge(p.badge);
-    }
     setOdo(p.odo, s.count);
     p.rest.textContent = ` / ${s.total} · ${s.lines} ${s.lines === 1 ? "lijn" : "lijnen"}`;
     p.fill.style.transform = `scaleX(${s.total ? s.count / s.total : 0})`;
+    p.drinks.textContent = `🍺 ${s.given} ${GT.givenLabel} · 🥴 ${s.received} ${GT.receivedLabel}`;
     row.classList.toggle("leader", i === 0 && s.count > 0);
     root.appendChild(row);
   });
@@ -1638,15 +1642,15 @@ function summarize(grouped) {
     const set = new Set(grouped[p.id] || []);
     const count = tickedCount(grid, set);
     const full = isFullCard(grid, set);
-    const rankIdx = rankIndexFor(count, full);
+    const totals = drinkTotals();
     return {
       player: p,
       total: playableTotal(),
       count,
       lines: computeCompletedLines(grid, set).length,
       full,
-      rankIdx,
-      rank: EE.ranks[rankIdx].name,
+      given: totals.given[p.id] || 0,
+      received: totals.received[p.id] || 0,
     };
   }).sort((a, b) => (b.full - a.full) || (b.lines - a.lines) || (b.count - a.count));
 }
@@ -1958,7 +1962,7 @@ attachLongPress($("admin-stamp"), { ms: 700, onLongPress: openAdminEntry });
 attachLongPress($("player-tag"), { ms: 700, onLongPress: openAdminEntry });
 
 // ---------------------------------------------------------------------
-// rangen en insigne (teksten en drempels staan in data.js)
+// svg-hulpje
 // ---------------------------------------------------------------------
 const SVGNS = "http://www.w3.org/2000/svg";
 function svgEl(name, attrs) {
@@ -1966,90 +1970,204 @@ function svgEl(name, attrs) {
   Object.entries(attrs).forEach(([k, v]) => node.setAttribute(k, v));
   return node;
 }
-function starPoints(cx, cy, r) {
-  const pts = [];
-  for (let i = 0; i < 10; i++) {
-    const rad = i % 2 ? r * 0.42 : r;
-    const a = -Math.PI / 2 + (i * Math.PI) / 5;
-    pts.push(`${(cx + rad * Math.cos(a)).toFixed(2)},${(cy + rad * Math.sin(a)).toFixed(2)}`);
+// ---------------------------------------------------------------------
+// drankbonnen (instellingen en teksten staan in data.js, GAME)
+// ---------------------------------------------------------------------
+const GT = GAME.texts;
+const gameFmt = (tpl, vars = {}) => fmt(tpl, { drinkWord: GAME.drinkWord, ...vars });
+
+const linesCount = () => computeCompletedLines(state.card, state.ticks).length;
+const earnedBons = () => Math.floor(tickedCount(state.card, state.ticks) / GAME.ticksPerBon) + GAME.bonPerLine * linesCount();
+
+function drinkTotals() {
+  const given = {};
+  const received = {};
+  state.drinkEvents.forEach((d) => {
+    given[d.from] = (given[d.from] || 0) + 1;
+    received[d.to] = (received[d.to] || 0) + 1;
+  });
+  return { given, received };
+}
+const pendingDrinkOps = () => getQueue().filter((q) => q.op === "drink").length;
+function availableBons() {
+  if (!state.player || !state.card) return 0;
+  const given = drinkTotals().given[state.player.id] || 0;
+  return Math.max(0, earnedBons() - given - pendingDrinkOps());
+}
+const persistDrinks = () => lsSet("kesnoene_drinks", Array.from(state.drinkEvents.values()));
+
+function updateDrinkButton() {
+  const btn = $("drink-btn");
+  if (!btn || !state.player || !state.card) return;
+  const n = availableBons();
+  btn.textContent = fmt(GT.giveButton, { n });
+  btn.disabled = n < 1 || isReadOnly();
+}
+
+// alle uitgedeelde drankjes (server is leidend; lokaal bewaard voor offline)
+async function loadDrinks() {
+  if (!supabase) return;
+  const { data, error } = await sb(supabase.from("events").select("id, player, payload").eq("kind", "drink").order("id"));
+  if (error || !Array.isArray(data)) return;
+  state.drinkEvents = new Map(data.map((e) => [e.id, { id: e.id, from: e.player, to: (e.payload || {}).to }]));
+  persistDrinks();
+  updateDrinkButton();
+  checkMissedOrders();
+  if (currentTab === "scoreboard") renderScoreboard();
+}
+
+function addDrinkEvent(e) {
+  state.drinkEvents.set(e.id, { id: e.id, from: e.player, to: (e.payload || {}).to });
+  persistDrinks();
+  updateDrinkButton();
+  if (currentTab === "scoreboard") renderScoreboard();
+}
+
+// ----- nieuwe bon verdiend -----
+function announceBon() {
+  showToast(GT.earnedToast);
+  vibrate([25, 40, 25]);
+  flyBon();
+}
+
+function popDrinkButton() {
+  const btn = $("drink-btn");
+  if (!btn || reduced()) return;
+  btn.animate([{ transform: "scale(1)" }, { transform: "scale(1.2)" }, { transform: "scale(1)" }], { duration: 360, easing: "ease-out" });
+}
+
+// een bon vliegt naar de "zak" (de knop)
+let lastTickedId = null;
+function flyBon() {
+  const btn = $("drink-btn");
+  if (!btn || !btn.offsetParent || reduced()) { popDrinkButton(); return; }
+  const fromEl = lastTickedId && cellEls.get(lastTickedId);
+  const fr = fromEl ? fromEl.getBoundingClientRect() : { left: window.innerWidth / 2 - 20, top: window.innerHeight / 2, width: 40, height: 40 };
+  const tr = btn.getBoundingClientRect();
+  const sx = fr.left + fr.width / 2 - 18;
+  const sy = fr.top + fr.height / 2 - 18;
+  const ex = tr.left + tr.width / 2 - 18;
+  const ey = tr.top + tr.height / 2 - 18;
+  const bon = h("div", "bon-fly", "🍺");
+  document.body.append(bon);
+  bon.animate([
+    { transform: `translate(${sx}px,${sy}px) scale(0.4) rotate(-20deg)`, opacity: 0 },
+    { transform: `translate(${sx}px,${sy - 24}px) scale(1.5) rotate(8deg)`, opacity: 1, offset: 0.22 },
+    { transform: `translate(${(sx + ex) / 2}px,${Math.min(sy, ey) - 60}px) scale(1.2) rotate(-6deg)`, opacity: 1, offset: 0.58 },
+    { transform: `translate(${ex}px,${ey}px) scale(0.5) rotate(0deg)`, opacity: 0.9 },
+  ], { duration: 900, easing: "ease-in-out" }).onfinish = () => { bon.remove(); popDrinkButton(); };
+}
+
+function checkBon() {
+  const earned = earnedBons();
+  if (earned > state.bonSeen) {
+    state.bonSeen = earned;
+    lsSet(pkey("bon"), earned);
+    announceBon();
   }
-  return pts.join(" ");
+  updateDrinkButton();
 }
 
-// insigne in stencilstijl: strepen (chevrons) of sterren op een kader
-function rankBadgeSVG(rank) {
-  const svg = svgEl("svg", { viewBox: "0 0 24 24", class: "rank-svg", "aria-hidden": "true" });
-  svg.append(svgEl("rect", { x: 1.5, y: 1.5, width: 21, height: 21, rx: 3, class: "rank-frame" }));
-  if (rank.chevrons) {
-    const gap = 5;
-    const startY = 12 + ((rank.chevrons - 1) * gap) / 2 + 3;
-    for (let i = 0; i < rank.chevrons; i++) {
-      const y = startY - i * gap;
-      svg.append(svgEl("path", { d: `M5 ${y} L12 ${y - 5} L19 ${y}`, class: "rank-chev" }));
-    }
-  } else if (rank.stars) {
-    const n = rank.stars;
-    const r = n === 1 ? 6.5 : 3.7;
-    const spacing = n === 1 ? 0 : 6.4;
-    for (let i = 0; i < n; i++) {
-      svg.append(svgEl("polygon", { points: starPoints(12 - ((n - 1) * spacing) / 2 + i * spacing, 12, r), class: "rank-star" }));
-    }
-  } else {
-    svg.append(svgEl("circle", { cx: 12, cy: 12, r: 3, class: "rank-dot" }));
-  }
-  return svg;
-}
-
-function renderHeaderBadge() {
-  const el = $("rank-badge");
-  if (!state.player || !el) return;
-  const rank = EE.ranks[state.rankIdx];
-  el.replaceChildren(rankBadgeSVG(rank));
-  el.setAttribute("aria-label", rank.name);
-}
-
-// het insigne "speldt" zich vast
-function pinBadge(el) {
-  if (!el) return;
-  if (reduced()) { el.animate([{ opacity: 0.3 }, { opacity: 1 }], { duration: 300 }); return; }
-  el.animate([
-    { transform: "translateY(-14px) scale(2.2) rotate(-24deg)", opacity: 0 },
-    { transform: "translateY(1px) scale(0.88) rotate(4deg)", opacity: 1, offset: 0.62 },
-    { transform: "none", opacity: 1 },
-  ], { duration: 480, easing: "cubic-bezier(.3,1.3,.5,1)" });
-}
-
-// na een wijziging van buitenaf: geen toast, geen event
-function silentRankSync() {
+// na een wijziging van buitenaf: geen toast
+function silentBonSync() {
   if (!state.player || !state.card) return;
-  state.rankIdx = currentRankIdx();
-  state.reportedRank = Math.min(state.reportedRank, state.rankIdx);
-  lsSet(pkey("rank"), state.reportedRank);
-  renderHeaderBadge();
+  state.bonSeen = Math.min(state.bonSeen, earnedBons());
+  lsSet(pkey("bon"), state.bonSeen);
+  updateDrinkButton();
 }
 
-// na eigen tikken: een rang die al gemeld is komt nooit opnieuw in de feed
-function checkRank() {
-  const idx = currentRankIdx();
-  const prev = state.rankIdx;
-  state.rankIdx = idx;
-  renderHeaderBadge();
-  if (idx <= prev) return;
-  pinBadge($("rank-badge"));
-  if (idx <= state.reportedRank) return;
-  state.reportedRank = idx;
-  lsSet(pkey("rank"), idx);
-  const name = EE.ranks[idx].name;
-  showToast(fmt(EE.promotion.toastSelf, { rank: name }));
-  vibrate([30, 50, 30]);
-  reportEvent("promotion", { rank: name });
+// ----- uitdelen -----
+function openGiveSheet() {
+  if (availableBons() < 1 || isReadOnly()) return;
+  const others = PLAYERS.filter((p) => p.id !== state.player.id);
+  openSheet({
+    title: gameFmt(GT.giveTitle),
+    build: (sheet) => others.forEach((p) => {
+      const btn = h("button", "btn-primary give-target", p.name);
+      btn.type = "button";
+      btn.addEventListener("click", () => confirmGive(p));
+      sheet.append(btn);
+    }),
+    actions: [{ label: GT.cancel, cls: "btn-secondary", onClick: closeSheet }],
+  });
 }
 
-function playPromotionDemo() {
-  const next = EE.ranks[Math.min(state.rankIdx + 1, EE.ranks.length - 1)];
-  showToast(fmt(EE.promotion.toastSelf, { rank: next.name }));
-  vibrate([30, 50, 30]);
-  pinBadge($("rank-badge"));
+function confirmGive(player) {
+  openSheet({
+    title: gameFmt(GT.confirmTitle, { name: player.name }),
+    actions: [
+      { label: GT.confirmYes, cls: "btn-primary", onClick: () => { closeSheet(); giveDrink(player.id); } },
+      { label: GT.confirmNo, cls: "btn-secondary", onClick: openGiveSheet },
+    ],
+  });
+}
+
+function giveDrink(toId) {
+  if (availableBons() < 1) return;
+  queueOp("drink", null, { to: toId });
+  showToast(gameFmt(GT.givenToast, { from: state.player.name, to: nameOf(toId) }));
+  vibrate(20);
+  updateDrinkButton();
+}
+$("drink-btn").addEventListener("click", openGiveSheet);
+
+// ----- bevel: grote melding bij de ontvanger -----
+const orderQueue = [];
+const orderIds = new Set();
+let orderOpen = false;
+const getAck = () => lsGet(pkey("ack"), null);
+
+function enqueueOrder(evt) {
+  if (!state.player || orderIds.has(evt.id)) return;
+  if (!evt.demo && evt.id <= (getAck() || 0)) return;
+  orderIds.add(evt.id);
+  orderQueue.push(evt);
+  if (!orderOpen) showNextOrder();
+}
+
+function showNextOrder() {
+  const evt = orderQueue.shift();
+  const root = $("order-root");
+  if (!evt) { orderOpen = false; root.replaceChildren(); return; }
+  orderOpen = true;
+  root.replaceChildren();
+  const overlay = h("div", "order-overlay");
+  overlay.setAttribute("role", "alertdialog");
+  const card = h("div", "order-card");
+  card.append(h("p", "order-title", GT.orderTitle), h("p", "order-from", gameFmt(GT.orderFrom, { from: nameOf(evt.player) })));
+  const btn = h("button", "btn-primary order-btn", GT.orderButton);
+  btn.type = "button";
+  const shownAt = performance.now();
+  btn.addEventListener("click", () => {
+    if (performance.now() - shownAt < 600) return;
+    if (!evt.demo && evt.id > (getAck() || 0)) lsSet(pkey("ack"), evt.id);
+    showNextOrder();
+  });
+  card.append(btn);
+  overlay.append(card);
+  root.append(overlay);
+  vibrate([220, 100, 220, 100, 420]);
+  if (!reduced()) {
+    card.animate([
+      { transform: "scale(2.6) rotate(-10deg)", opacity: 0 },
+      { transform: "scale(0.94) rotate(-3deg)", opacity: 1, offset: 0.6 },
+      { transform: "scale(1) rotate(-3deg)", opacity: 1 },
+    ], { duration: 420, easing: "cubic-bezier(.3,1.4,.5,1)", fill: "both" });
+  }
+}
+
+// bevelen die binnenkwamen terwijl de app dicht was
+function checkMissedOrders() {
+  if (!state.player) return;
+  const events = Array.from(state.drinkEvents.values());
+  let ack = lsGet(pkey("ack"), null);
+  if (ack === null) { lsSet(pkey("ack"), events.reduce((m, e) => Math.max(m, e.id), 0)); return; }
+  events.filter((e) => e.to === state.player.id && e.id > ack).sort((a, b) => a.id - b.id)
+    .forEach((e) => enqueueOrder({ id: e.id, player: e.from, payload: { to: e.to } }));
+}
+
+function showOrderDemo() {
+  enqueueOrder({ id: -Date.now(), demo: true, player: (PLAYERS.find((p) => !state.player || p.id !== state.player.id) || PLAYERS[0]).id, payload: { to: state.player ? state.player.id : null } });
 }
 
 // ---------------------------------------------------------------------
@@ -2289,6 +2407,7 @@ async function loadStandings() {
   const client = await initSupabase();
   let grouped = null;
   if (client && navigator.onLine) {
+    await loadDrinks();
     const timeout = new Promise((resolve) => setTimeout(() => resolve({ error: true }), 4000));
     const res = await Promise.race([sb(client.from("ticks").select("player, cell_id")), timeout]);
     if (!res.error && Array.isArray(res.data)) {
@@ -2301,6 +2420,21 @@ async function loadStandings() {
   return grouped ? summarize(grouped) : null;
 }
 
+// "Meest gul" en "Grootste slachtoffer": bij gelijke stand staan ze er allebei
+function creditsAwards(standings) {
+  const A = EE.credits.awards;
+  const box = h("div", "credits-awards");
+  [[A.generous, "given"], [A.victim, "received"]].forEach(([award, key]) => {
+    const max = Math.max(...standings.map((s) => s[key]));
+    if (max < 1) return;
+    const names = standings.filter((s) => s[key] === max).map((s) => s.player.name).join(A.joiner);
+    const item = h("div", "credits-award");
+    item.append(h("p", "credits-winner-label", `${award.icon} ${award.label}`), h("p", "credits-award-name", names), h("p", "credits-detail", fmt(award.detail, { n: max })));
+    box.append(item);
+  });
+  return box.children.length ? box : null;
+}
+
 function creditsStandingsBlock(standings) {
   const C = EE.credits;
   const wrap = h("div", "credits-section");
@@ -2311,9 +2445,11 @@ function creditsStandingsBlock(standings) {
     win.append(h("p", "credits-winner-label", `★ ${C.winnerLabel}`), h("p", "credits-winner-name", standings[0].player.name));
     wrap.append(win);
   }
+  const awards = creditsAwards(standings);
+  if (awards) wrap.append(awards);
   standings.forEach((s) => {
     const row = h("div", "credits-row");
-    row.append(h("span", "credits-name", s.player.name), h("span", "credits-detail", fmt(C.standingRow, { count: s.count, total: s.total, lines: s.lines, rank: s.rank })));
+    row.append(h("span", "credits-name", s.player.name), h("span", "credits-detail", fmt(C.standingRow, { count: s.count, total: s.total, lines: s.lines, linesWord: C.linesWord[s.lines === 1 ? 0 : 1] })));
     wrap.append(row);
   });
   return wrap;
@@ -2423,7 +2559,7 @@ async function openCredits() {
 async function runEgg(id) {
   if (id === "car") { carBusy = false; $("car-layer").replaceChildren(); driveCar(); return; }
   if (id === "dogtag") { showDogTag(0); return; }
-  if (id === "promotion") { playPromotionDemo(); return; }
+  if (id === "order") { showOrderDemo(); return; }
   if (id === "lockspam") {
     closeAdminPanel();
     const lockedCell = $("screen-main").classList.contains("active") && document.querySelector('#card-grid .cell[data-state="locked"]');

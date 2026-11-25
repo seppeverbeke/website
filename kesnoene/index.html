@@ -48,6 +48,7 @@
   <div id="toast-root" aria-live="polite"></div>
   <div id="modal-root"></div>
   <div id="dogtag-root" aria-live="polite"></div>
+  <div id="order-root"></div>
   <div id="car-layer" class="car-layer"></div>
   <div id="credits" class="credits hidden" role="dialog"></div>
   <button id="preview-exit" class="preview-exit hidden" type="button"></button>
@@ -140,7 +141,6 @@
       <div class="app-shell">
         <header class="main-header">
           <div class="conn-indicator" id="conn-indicator">&middot;</div>
-          <span id="rank-badge" class="rank-badge header-badge" role="img"></span>
           <div class="player-tag" id="player-tag"></div>
           <button id="btn-switch-player" class="link-btn" type="button">Wissel</button>
         </header>
@@ -153,8 +153,11 @@
 
         <div class="tab-panel active" data-panel="card" id="panel-card">
           <div class="card-stats">
-            <span class="count" id="card-count">0 / 16</span>
-            <span class="lines" id="card-lines">0 lijnen</span>
+            <div class="card-stats-left">
+              <span class="count" id="card-count">0 / 16</span>
+              <span class="lines" id="card-lines">0 lijnen</span>
+            </div>
+            <button id="drink-btn" class="drink-btn" type="button" disabled></button>
           </div>
           <p id="readonly-note" class="readonly-note hidden" role="status"></p>
           <div class="card-grid" id="card-grid"></div>

@@ -108,14 +108,49 @@ export const BRIEFING = {
   ],
 };
 
-// Spelregels, getoond in een uitklapbaar blok op de kaart. Vul later aan.
-export const RULES = [];
+// =====================================================================
+// SPEL: drankbonnen
+//   verdiend = floor(aantal ticks / ticksPerBon) + bonPerLine x volle lijnen
+//   beschikbaar = verdiend min uitgedeeld, nooit onder 0
+// =====================================================================
+export const GAME = {
+  ticksPerBon: 3,       // per 3 aangevinkte vakjes 1 bon
+  bonPerLine: 1,        // extra bon per volle rij, kolom of diagonaal
+  drinkWord: "drankje", // tekst in de app, pas ik later nog aan
+
+  // teksten van het spel; {drinkWord} wordt vervangen door drinkWord
+  texts: {
+    giveButton: "🍺 Deel uit ({n})",
+    giveTitle: "Wie krijgt een {drinkWord}?",
+    cancel: "Annuleren",
+    confirmTitle: "{name} krijgt een {drinkWord}. Zeker?",
+    confirmYes: "Ja, deel uit",
+    confirmNo: "Terug",
+    earnedToast: "🍺 Je hebt een drankbon verdiend!",
+    givenToast: "🍺 {from} deelt een {drinkWord} uit aan {to}",
+    orderTitle: "BEVEL: DRINKEN",
+    orderFrom: "van {from}",
+    orderButton: "Begrepen 🫡",
+    givenLabel: "uitgedeeld",
+    receivedLabel: "ontvangen",
+  },
+};
+
+// Spelregels, getoond in een uitklapbaar blok op de kaart.
+// {drinkWord}, {ticksPerBon} en {bonPerLine} komen uit GAME.
+export const RULES = [
+  "Zie je iets op je kaart gebeuren? Tik het aan.",
+  "Per {ticksPerBon} vakjes verdien je een drankbon.",
+  "Elke volle rij, kolom of diagonaal: een extra bon.",
+  "Met een bon geef je iemand een {drinkWord}. Wanneer en aan wie je wil.",
+  "Een bevel weigeren kan niet, soldaat.",
+];
 
 // =====================================================================
 // EASTER EGGS
 // Alle teksten en instellingen van de easter eggs staan hier. Niets
 // hiervan is geheim: stopnamen komen er bewust niet in voor.
-// Sjablonen gebruiken {accolades}, bv. {name}, {rank}, {n}.
+// Sjablonen gebruiken {accolades}, bv. {name}, {drinkWord}, {n}.
 // =====================================================================
 export const EASTER_EGGS = {
 
@@ -152,20 +187,6 @@ export const EASTER_EGGS = {
   ],
   dogtagHoldMs: 500,
 
-  // 6. Rangen per aantal aangevinkte vakjes. fullCard: enkel bij een volle
-  // kaart. chevrons = strepen, stars = sterren op het insigne.
-  ranks: [
-    { min: 0,  name: "Soldaat",   chevrons: 0, stars: 0 },
-    { min: 4,  name: "Korporaal", chevrons: 1, stars: 0 },
-    { min: 8,  name: "Sergeant",  chevrons: 2, stars: 0 },
-    { min: 12, name: "Luitenant", chevrons: 0, stars: 1 },
-    { min: 16, name: "Generaal",  chevrons: 0, stars: 3, fullCard: true },
-  ],
-  promotion: {
-    toastSelf: "📯 Bevorderd tot {rank}!",
-    feed: "📯 {name} is bevorderd tot {rank}",
-  },
-
   // 9. Te veel tikken op een slot
   lockSpam: {
     taps: 5,
@@ -192,7 +213,13 @@ export const EASTER_EGGS = {
     locations: ["Poperinge", "Wijtschate", "Kemmel", "Loker"],
     standingsLabel: "Final standings",
     winnerLabel: "Winnaar van de dag",
-    standingRow: "{count} / {total} vakjes · {lines} lijnen · {rank}",
+    standingRow: "{count} / {total} vakjes · {lines} {linesWord}",
+    linesWord: ["lijn", "lijnen"],   // enkelvoud, meervoud
+    awards: {
+      joiner: " en ",
+      generous: { icon: "🍺", label: "Meest gul", detail: "{n} uitgedeeld" },
+      victim: { icon: "🥴", label: "Grootste slachtoffer", detail: "{n} ontvangen" },
+    },
     standingsUnavailable: "Eindstand niet beschikbaar",
     thanksLabel: "Special thanks",
     thanks: ["TODO: naam", "TODO: naam", "TODO: naam"],
@@ -230,7 +257,7 @@ export const EASTER_EGGS = {
     items: [
       { id: "car",         label: "2CV rijdt voorbij" },
       { id: "dogtag",      label: "Dog tag tonen" },
-      { id: "promotion",   label: "Bevordering" },
+      { id: "order",       label: "Drankbevel" },
       { id: "lockspam",    label: "Slot-spam" },
       { id: "credits",     label: "Eindgeneriek" },
       { id: "memorial",    label: "Na middernacht" },

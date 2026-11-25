@@ -42,10 +42,8 @@ create unique index if not exists events_unlock_once
   on events (kind, (payload ->> 'stop_id'))
   where kind = 'unlock';
 
--- elke rang wordt maar één keer per speler gemeld (kind 'promotion')
-create unique index if not exists events_promotion_once
-  on events (player, (payload ->> 'rank'))
-  where kind = 'promotion';
+-- de rangen (kind 'promotion') bestaan niet meer; de index van vroeger mag weg
+drop index if exists events_promotion_once;
 
 -- ---------------------------------------------------------------------
 -- geheime inhoud: enkel zichtbaar voor de spelleider (secret_stops,
@@ -314,8 +312,6 @@ as $$
 begin
   perform check_admin_code(p_admin_code);
   delete from ticks where player = p_player_id;
-  -- ook de bevorderingen, zodat die speler zijn rangen opnieuw kan halen
-  delete from events where player = p_player_id and kind = 'promotion';
 end;
 $$;
 revoke all on function admin_reset_player(text, text) from public;
