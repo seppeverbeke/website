@@ -89,7 +89,8 @@ export const BRIEFING = {
     {
       heading: "RENDEZ-VOUS",
       lines: [
-        "Station Izegem · Stationsstraat 2A",
+        "Station Izegem",
+        "Stationsstraat 2A",
         "50°55'15.4\"N 3°12'53.3\"E",
         "Zaterdag 28.11 · 07:40 stipt",
       ],
@@ -185,7 +186,6 @@ export const EASTER_EGGS = {
       rank: "Opperbevelhebber",
       specialty: "Zette voor het eerst iets in de agenda op de juiste dag." },
   ],
-  dogtagHoldMs: 500,
 
   // 9. Te veel tikken op een slot
   lockSpam: {
@@ -196,40 +196,10 @@ export const EASTER_EGGS = {
     button: "Begrepen 🫡",
   },
 
-  // 10. Eindgeneriek vanaf MISSION.end tot memorial.from
-  credits: {
-    title: "MISSION KESNOENE",
-    ariaLabel: "Eindgeneriek",
-    date: "28.11.2026",
-    starringLabel: "Starring",
-    starring: [
-      { name: "Dennus", role: "as himself" },
-      { name: "Spriet", role: "as himself" },
-      { name: "Kruidn", role: "as himself" },
-    ],
-    directedLabel: "Written and directed by",
-    directed: { name: "Seppe", role: "as himself" },
-    locationsLabel: "Locations",
-    locations: ["Poperinge", "Wijtschate", "Kemmel", "Loker"],
-    standingsLabel: "Final standings",
-    winnerLabel: "Winnaar van de dag",
-    standingRow: "{count} / {total} vakjes · {lines} {linesWord}",
-    linesWord: ["lijn", "lijnen"],   // enkelvoud, meervoud
-    awards: {
-      joiner: " en ",
-      generous: { icon: "🍺", label: "Meest gul", detail: "{n} uitgedeeld" },
-      victim: { icon: "🥴", label: "Grootste slachtoffer", detail: "{n} ontvangen" },
-    },
-    standingsUnavailable: "Eindstand niet beschikbaar",
-    thanksLabel: "Special thanks",
-    thanks: ["TODO: naam", "TODO: naam", "TODO: naam"],
-    lastLine: "No soldiers were harmed. Some livers were.",
-    skipButton: "Overslaan",
+  // 10. Na 20:00 tot middernacht: de missie is voorbij
+  after: {
+    title: "MISSION ACCOMPLISHED",
     toCardButton: "Naar mijn kaart",
-    replayButton: "Opnieuw bekijken",
-    pausedLabel: "Gepauzeerd",
-    scrollSpeed: 34,     // pixels per seconde
-    photoFadeMs: 6000,
   },
 
   // 11. Na middernacht (alleen-lezen)
@@ -237,7 +207,6 @@ export const EASTER_EGGS = {
     from: "2026-11-29T00:00:00+01:00",
     title: "Mission Kesnoene · 28.11.2026",
     line: "Lest we forget.",
-    replayButton: "Bekijk de eindgeneriek",
     toCardButton: "Naar mijn kaart",
     readOnlyNote: "De missie is voorbij: je kaart is alleen te bekijken.",
     readOnlyToast: "De missie is voorbij, soldaat.",
@@ -246,7 +215,6 @@ export const EASTER_EGGS = {
   // 12. Verjaardag: 28 november van elk volgend jaar
   anniversary: {
     banner: "{n} jaar geleden… Tijd voor een nieuwe missie?",
-    button: "Herbeleef de missie",
     toCardButton: "Naar mijn kaart",
   },
 
@@ -259,7 +227,7 @@ export const EASTER_EGGS = {
       { id: "dogtag",      label: "Dog tag tonen" },
       { id: "order",       label: "Drankbevel" },
       { id: "lockspam",    label: "Slot-spam" },
-      { id: "credits",     label: "Eindgeneriek" },
+      { id: "after",       label: "Na 20:00" },
       { id: "memorial",    label: "Na middernacht" },
       { id: "anniversary", label: "Verjaardag" },
     ],

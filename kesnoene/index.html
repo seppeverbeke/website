@@ -50,7 +50,6 @@
   <div id="dogtag-root" aria-live="polite"></div>
   <div id="order-root"></div>
   <div id="car-layer" class="car-layer"></div>
-  <div id="credits" class="credits hidden" role="dialog"></div>
   <button id="preview-exit" class="preview-exit hidden" type="button"></button>
 
   <main id="app">
@@ -72,10 +71,10 @@
         </div>
 
         <div class="landing-content">
-          <h1 class="mission-title" data-show="before during credits anniversary">MISSION<br>KESNOENE</h1>
-          <p class="mission-date" data-show="before during credits anniversary">28.11.2026</p>
+          <h1 class="mission-title" data-show="before during after anniversary">MISSION<br>KESNOENE</h1>
+          <p class="mission-date" data-show="before during after anniversary">28.11.2026</p>
 
-          <div class="countdown" id="countdown" data-show="before during">
+          <div class="countdown" id="countdown" data-show="before during after">
             <p class="countdown-phase hidden" id="countdown-phase"></p>
             <div class="countdown-clock" id="countdown-clock">
               <div class="unit"><span class="num" id="cd-d">00</span><span class="lbl">DAGEN</span></div>
@@ -99,13 +98,11 @@
           <div id="memorial-block" class="post-block hidden" data-show="memorial">
             <h2 id="memorial-title" class="memorial-title"></h2>
             <p id="memorial-line" class="memorial-line"></p>
-            <button id="btn-memorial-replay" class="btn-secondary" type="button"></button>
             <button id="btn-memorial-card" class="btn-primary" type="button"></button>
           </div>
 
-          <div id="anniv-block" class="post-block hidden" data-show="credits anniversary">
-            <button id="btn-anniv-replay" class="btn-primary" type="button"></button>
-            <button id="btn-anniv-card" class="btn-secondary" type="button"></button>
+          <div id="anniv-block" class="post-block hidden" data-show="after anniversary">
+            <button id="btn-anniv-card" class="btn-primary" type="button"></button>
           </div>
         </div>
       </div>

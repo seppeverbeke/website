@@ -66,13 +66,13 @@ function computeMode() {
   const t = nowMs();
   if (t < new Date(MISSION.start).getTime()) return "before";
   if (t < new Date(MISSION.end).getTime()) return "during";
-  if (t < new Date(EE.memorial.from).getTime()) return "credits";
+  if (t < new Date(EE.memorial.from).getTime()) return "after";
   const p = brusselsParts(t);
   const m = brusselsParts(new Date(MISSION.start).getTime());
   return p.y > m.y && p.mo === m.mo && p.d === m.d ? "anniversary" : "memorial";
 }
 const landingMode = () => forcedMode || computeMode();
-const isPostMission = (mode) => mode === "credits" || mode === "memorial" || mode === "anniversary";
+const isPostMission = (mode) => mode === "after" || mode === "memorial" || mode === "anniversary";
 // vanaf middernacht kan er niets meer aangevinkt worden
 const isReadOnly = () => { const m = computeMode(); return m === "memorial" || m === "anniversary"; };
 
@@ -743,7 +743,6 @@ function missionPhase() {
 
 function enterGame() {
   leavePreview();
-  closeCredits();
   loadPlayerState();
   $("player-tag").textContent = state.player.name.toUpperCase();
   if (missionPhase() === "before") {
@@ -781,7 +780,7 @@ function goToCard() {
   const storedId = lsGet("kesnoene_player", null);
   const player = state.player || (storedId && PLAYERS.find((p) => p.id === storedId));
   if (player) { state.player = player; enterGame(); }
-  else { leavePreview(); closeCredits(); resetLoginScreen(); showScreen("login"); }
+  else { leavePreview(); resetLoginScreen(); showScreen("login"); }
 }
 
 // ---------------------------------------------------------------------
@@ -797,7 +796,6 @@ function setDigit(el, text) {
 }
 
 // welke blokken zichtbaar zijn hangt af van de modus (data-show) en de foto kleurt mee
-let creditsAutoShown = false;
 function applyLandingMode(mode) {
   const screen = $("screen-landing");
   screen.dataset.mode = mode;
@@ -806,6 +804,7 @@ function applyLandingMode(mode) {
   });
   const years = Math.max(1, brusselsParts(nowMs()).y - brusselsParts(new Date(MISSION.start).getTime()).y);
   $("anniv-banner").textContent = fmt(EE.anniversary.banner, { n: years });
+  $("btn-anniv-card").textContent = mode === "after" ? EE.after.toCardButton : EE.anniversary.toCardButton;
   $("preview-exit").classList.toggle("hidden", !forcedMode);
 }
 
@@ -869,27 +868,26 @@ function initLandingTexts() {
   initBriefing();
   $("memorial-title").textContent = EE.memorial.title;
   $("memorial-line").textContent = EE.memorial.line;
-  $("btn-memorial-replay").textContent = EE.memorial.replayButton;
   $("btn-memorial-card").textContent = EE.memorial.toCardButton;
-  $("btn-anniv-replay").textContent = EE.anniversary.button;
   $("btn-anniv-card").textContent = EE.anniversary.toCardButton;
   $("preview-exit").textContent = EE.adminTest.exitPreview;
-  $("credits").setAttribute("aria-label", EE.credits.ariaLabel);
   $("readonly-note").textContent = EE.memorial.readOnlyNote;
 }
 
 function updateLanding() {
   const mode = landingMode();
   if ($("screen-landing").dataset.mode !== mode) applyLandingMode(mode);
-  if (mode === "credits" && !creditsAutoShown && $("screen-landing").classList.contains("active")) {
-    creditsAutoShown = true;
-    openCredits();
+  const phaseEl = $("countdown-phase");
+  const clock = $("countdown-clock");
+  if (mode === "after") {
+    phaseEl.textContent = EE.after.title;
+    phaseEl.classList.remove("hidden");
+    clock.classList.add("hidden");
+    return;
   }
   if (mode !== "before" && mode !== "during") return;
 
   const phase = mode;
-  const phaseEl = $("countdown-phase");
-  const clock = $("countdown-clock");
   const btn = $("btn-enlist");
   const note = $("enlist-note");
 
@@ -963,8 +961,6 @@ $("btn-enlist").addEventListener("click", () => {
 });
 $("btn-memorial-card").addEventListener("click", goToCard);
 $("btn-anniv-card").addEventListener("click", goToCard);
-$("btn-memorial-replay").addEventListener("click", () => openCredits());
-$("btn-anniv-replay").addEventListener("click", () => openCredits());
 $("preview-exit").addEventListener("click", () => leavePreview());
 
 // voorbeeld uit het admin-paneel: forceert een modus op de landingspagina
@@ -972,7 +968,6 @@ let previewReturn = null;
 function startPreview(mode) {
   if (!forcedMode) previewReturn = document.querySelector(".screen.active")?.dataset.screen || null;
   forcedMode = mode;
-  creditsAutoShown = false;
   closeAdminPanel();
   showScreen("landing");
   $("screen-landing").dataset.mode = "";
@@ -982,8 +977,6 @@ function startPreview(mode) {
 function leavePreview() {
   if (!forcedMode) return;
   forcedMode = null;
-  creditsAutoShown = false;
-  closeCredits();
   $("screen-landing").dataset.mode = "";
   $("preview-exit").classList.add("hidden");
   // terug naar waar je vandaan kwam
@@ -2187,7 +2180,8 @@ function buildDogtagZones() {
     zoom.append(zone);
   });
   if (new URLSearchParams(location.search).has("zones")) zoom.classList.add("show-zones");
-  attachLongPress(zoom, { selector: ".dogtag-zone", ms: EE.dogtagHoldMs, onLongPress: (el) => showDogTag(Number(el.dataset.idx)) });
+  // een tik opent de tag; meer dan 10 px bewegen (scrollen) opent niets
+  attachLongPress(zoom, { selector: ".dogtag-zone", shouldStart: () => false, onTap: (el) => showDogTag(Number(el.dataset.idx)) });
 }
 
 function chainSVG() {
@@ -2390,170 +2384,6 @@ function scheduleCar() {
 }
 
 // ---------------------------------------------------------------------
-// 10. eindgeneriek (ook voor "Herbeleef de missie" en de herinnering)
-// ---------------------------------------------------------------------
-let creditsAnim = null;
-
-function closeCredits() {
-  const root = $("credits");
-  if (!root) return;
-  if (creditsAnim) { creditsAnim.cancel(); creditsAnim = null; }
-  root.classList.add("hidden");
-  root.replaceChildren();
-  document.body.classList.remove("credits-open");
-}
-
-async function loadStandings() {
-  const client = await initSupabase();
-  let grouped = null;
-  if (client && navigator.onLine) {
-    await loadDrinks();
-    const timeout = new Promise((resolve) => setTimeout(() => resolve({ error: true }), 4000));
-    const res = await Promise.race([sb(client.from("ticks").select("player, cell_id")), timeout]);
-    if (!res.error && Array.isArray(res.data)) {
-      grouped = {};
-      res.data.forEach((r) => { (grouped[r.player] ||= []).push(r.cell_id); });
-      lsSet("kesnoene_all_ticks_cache", grouped);
-    }
-  }
-  if (!grouped) grouped = lsGet("kesnoene_all_ticks_cache", null);
-  return grouped ? summarize(grouped) : null;
-}
-
-// "Meest gul" en "Grootste slachtoffer": bij gelijke stand staan ze er allebei
-function creditsAwards(standings) {
-  const A = EE.credits.awards;
-  const box = h("div", "credits-awards");
-  [[A.generous, "given"], [A.victim, "received"]].forEach(([award, key]) => {
-    const max = Math.max(...standings.map((s) => s[key]));
-    if (max < 1) return;
-    const names = standings.filter((s) => s[key] === max).map((s) => s.player.name).join(A.joiner);
-    const item = h("div", "credits-award");
-    item.append(h("p", "credits-winner-label", `${award.icon} ${award.label}`), h("p", "credits-award-name", names), h("p", "credits-detail", fmt(award.detail, { n: max })));
-    box.append(item);
-  });
-  return box.children.length ? box : null;
-}
-
-function creditsStandingsBlock(standings) {
-  const C = EE.credits;
-  const wrap = h("div", "credits-section");
-  wrap.append(h("p", "credits-label", C.standingsLabel));
-  if (!standings) { wrap.append(h("p", "credits-line", C.standingsUnavailable)); return wrap; }
-  if (standings[0].count > 0) {
-    const win = h("div", "credits-winner");
-    win.append(h("p", "credits-winner-label", `★ ${C.winnerLabel}`), h("p", "credits-winner-name", standings[0].player.name));
-    wrap.append(win);
-  }
-  const awards = creditsAwards(standings);
-  if (awards) wrap.append(awards);
-  standings.forEach((s) => {
-    const row = h("div", "credits-row");
-    row.append(h("span", "credits-name", s.player.name), h("span", "credits-detail", fmt(C.standingRow, { count: s.count, total: s.total, lines: s.lines, linesWord: C.linesWord[s.lines === 1 ? 0 : 1] })));
-    wrap.append(row);
-  });
-  return wrap;
-}
-
-function creditsList(label, rows) {
-  const wrap = h("div", "credits-section");
-  wrap.append(h("p", "credits-label", label));
-  rows.forEach((r) => {
-    const line = h("p", "credits-line");
-    if (typeof r === "string") line.textContent = r;
-    else { line.append(h("span", "credits-name", r.name), " ", h("span", "credits-role", r.role)); }
-    wrap.append(line);
-  });
-  return wrap;
-}
-
-function buildCreditsContent(scroll, standings) {
-  const C = EE.credits;
-  const head = h("div", "credits-section credits-head");
-  head.append(h("h2", "credits-title", C.title), h("p", "credits-date", C.date));
-  scroll.append(
-    head,
-    creditsList(C.starringLabel, C.starring),
-    creditsList(C.directedLabel, [C.directed]),
-    creditsList(C.locationsLabel, C.locations),
-    creditsStandingsBlock(standings),
-    creditsList(C.thanksLabel, C.thanks),
-    h("p", "credits-last", C.lastLine),
-    h("div", "credits-spacer"),
-  );
-}
-
-function buildFinalContent(final, standings) {
-  const C = EE.credits;
-  final.append(h("h2", "credits-title", C.title), h("p", "credits-date", C.date), creditsStandingsBlock(standings), h("p", "credits-last", C.lastLine));
-}
-
-function showCreditsFinal() {
-  const root = $("credits");
-  if (creditsAnim) { creditsAnim.cancel(); creditsAnim = null; }
-  const scroll = root.querySelector(".credits-scroll");
-  const final = root.querySelector(".credits-final");
-  if (!scroll || !final) return;
-  scroll.classList.add("hidden");
-  root.querySelector(".credits-photo")?.classList.add("hidden");
-  root.querySelector(".credits-paused")?.classList.add("hidden");
-  root.querySelector(".credits-skip")?.classList.add("hidden");
-  root.querySelector(".credits-replay")?.classList.remove("hidden");
-  final.classList.remove("hidden");
-  if (!reduced()) final.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 600 });
-}
-
-async function openCredits() {
-  const C = EE.credits;
-  const root = $("credits");
-  closeCredits();
-  root.classList.remove("hidden");
-  document.body.classList.add("credits-open");
-  const still = reduced();
-  root.classList.toggle("static", still);
-
-  const heroImg = document.querySelector(".hero-img");
-  const photo = h("img", "credits-photo");
-  photo.alt = "";
-  photo.src = heroImg.currentSrc || heroImg.src;
-  const scroll = h("div", "credits-scroll");
-  const final = h("div", "credits-final hidden");
-  const skip = h("button", "credits-btn credits-skip", C.skipButton);
-  const toCard = h("button", "credits-btn credits-card", C.toCardButton);
-  const paused = h("div", "credits-paused hidden", C.pausedLabel);
-  const replay = h("button", "credits-btn credits-replay hidden", C.replayButton);
-  skip.type = toCard.type = replay.type = "button";
-  root.append(photo, scroll, final, skip, toCard, replay, paused);
-  if (!still) photo.animate([{ opacity: 1 }, { opacity: 0 }], { duration: C.photoFadeMs, fill: "forwards" });
-  else photo.remove();
-
-  skip.addEventListener("click", (e) => { e.stopPropagation(); showCreditsFinal(); });
-  toCard.addEventListener("click", (e) => { e.stopPropagation(); goToCard(); });
-  replay.addEventListener("click", (e) => { e.stopPropagation(); openCredits(); });
-
-  const standings = await loadStandings();
-  if (root.classList.contains("hidden")) return;
-  buildCreditsContent(scroll, standings);
-  buildFinalContent(final, standings);
-  if (still) return;
-
-  await new Promise((r) => requestAnimationFrame(r));
-  const contentH = scroll.scrollHeight;
-  const viewH = window.innerHeight;
-  creditsAnim = scroll.animate([
-    { transform: `translateY(${viewH}px)` },
-    { transform: `translateY(${-contentH}px)` },
-  ], { duration: ((viewH + contentH) / C.scrollSpeed) * 1000, easing: "linear", fill: "forwards" });
-  creditsAnim.onfinish = showCreditsFinal;
-  // tikken pauzeert of hervat
-  root.onclick = (e) => {
-    if (e.target.closest("button") || !creditsAnim) return;
-    if (creditsAnim.playState === "running") { creditsAnim.pause(); paused.classList.remove("hidden"); }
-    else { creditsAnim.play(); paused.classList.add("hidden"); }
-  };
-}
-
-// ---------------------------------------------------------------------
 // admin: "Easter eggs testen"
 // ---------------------------------------------------------------------
 async function runEgg(id) {
@@ -2568,7 +2398,7 @@ async function runEgg(id) {
     for (let i = 0; i < EE.lockSpam.taps; i++) { handleLockedTap(lockedCell); await sleep(330); }
     return;
   }
-  if (id === "credits" || id === "memorial" || id === "anniversary") startPreview(id);
+  if (id === "after" || id === "memorial" || id === "anniversary") startPreview(id);
 }
 
 // ---------------------------------------------------------------------

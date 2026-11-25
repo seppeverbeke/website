@@ -1128,111 +1128,6 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
   font-size: 12px;
 }
 
-/* ---------- eindgeneriek ---------- */
-.credits {
-  position: fixed;
-  inset: 0;
-  z-index: 250;
-  background: #000;
-  color: #fff;
-  overflow: hidden;
-  touch-action: manipulation;
-}
-.credits.static { overflow-y: auto; }
-.credits-photo {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: min(100vw, 480px);
-  transform: translateX(-50%);
-  display: block;
-  pointer-events: none;
-}
-.credits-scroll {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  padding: 0 28px;
-  text-align: center;
-  will-change: transform;
-}
-.credits.static .credits-scroll { position: relative; padding-bottom: 120px; }
-.credits-section { margin-bottom: 64px; }
-.credits-head { padding-top: 24px; }
-.credits-title {
-  font-size: clamp(30px, 10vw, 48px);
-  line-height: 1;
-  color: #fff;
-  text-shadow: none;
-  letter-spacing: 0.06em;
-}
-.credits-date { font-family: var(--font-mono); font-size: 16px; letter-spacing: 0.2em; margin-top: 10px; color: #ddd; }
-.credits-label {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.35em;
-  text-transform: uppercase;
-  color: #9a9a9a;
-  margin-bottom: 18px;
-}
-.credits-line { font-size: 18px; line-height: 1.7; color: #fff; }
-.credits-name { font-family: var(--font-stencil); letter-spacing: 0.08em; text-transform: uppercase; }
-.credits-role { font-style: italic; color: #cfcfcf; }
-.credits-winner { margin-bottom: 22px; }
-.credits-winner-label { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.25em; color: #f2d674; text-transform: uppercase; }
-.credits-winner-name { font-family: var(--font-stencil); font-size: clamp(28px, 9vw, 40px); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 6px; }
-.credits-row { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-bottom: 14px; }
-.credits-detail { font-family: var(--font-mono); font-size: 12px; color: #cfcfcf; }
-.credits-last { font-style: italic; font-size: 17px; line-height: 1.5; color: #fff; margin: 0 0 48px; }
-.credits-spacer { height: 40vh; }
-
-.credits-final {
-  position: absolute;
-  inset: 0;
-  overflow-y: auto;
-  padding: calc(28px + var(--safe-t)) 24px calc(84px + var(--safe-b));
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-.credits-final .credits-title { font-size: clamp(26px, 8.5vw, 40px); }
-.credits-final .credits-section { margin: 14px 0 6px; width: 100%; }
-.credits-final .credits-row { margin-bottom: 9px; }
-.credits-final .credits-winner { margin-bottom: 14px; }
-.credits-final .credits-last { margin: 8px 0 0; }
-
-.credits-btn {
-  position: absolute;
-  z-index: 3;
-  min-height: var(--tap);
-  padding: 0 16px;
-  background: rgba(0, 0, 0, 0.7);
-  border: 1px solid #fff;
-  color: #fff;
-  border-radius: 4px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.06em;
-}
-.credits-skip { top: calc(12px + var(--safe-t)); right: 12px; }
-.credits-card { right: 12px; bottom: calc(12px + var(--safe-b)); background: rgba(0, 0, 0, 0.92); }
-.credits-replay { left: 12px; bottom: calc(12px + var(--safe-b)); background: rgba(0, 0, 0, 0.92); }
-.credits-paused {
-  position: absolute;
-  top: calc(20px + var(--safe-t));
-  left: 16px;
-  font-family: var(--font-mono);
-  font-size: 12px;
-  letter-spacing: 0.2em;
-  color: #fff;
-  text-transform: uppercase;
-}
-body.credits-open .preview-exit { left: 12px; }
-body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
-
 /* ---------- 2CV ---------- */
 .car-layer {
   position: fixed;
@@ -1614,32 +1509,7 @@ body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
   font-size: 12px;
   color: var(--khaki-light);
 }
-.credits-awards { display: flex; flex-direction: column; gap: 18px; margin: 4px 0 26px; }
-.credits-award { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.credits-award-name {
-  font-family: var(--font-stencil);
-  font-size: clamp(22px, 7vw, 32px);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #fff;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .order-overlay { animation: none !important; }
 }
-
-/* eindkaart compacter, nu er titels bij zijn */
-.credits-final .credits-winner-name { font-size: clamp(26px, 8vw, 34px); }
-.credits-final .credits-awards { gap: 10px; margin: 0 0 12px; }
-.credits-final .credits-award-name { font-size: 20px; }
-.credits-final .credits-row {
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 10px;
-  width: 100%;
-  max-width: 330px;
-  margin: 0 auto 8px;
-}
-.credits-final .credits-detail { font-size: 11px; text-align: right; }
-.credits-final .credits-name { font-size: 15px; }
