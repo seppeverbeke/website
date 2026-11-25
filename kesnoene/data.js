@@ -102,16 +102,24 @@ export const EASTER_EGGS = {
 
   // 5. Dog tags op de foto. x, y en r zijn percentages van de foto
   // (x van links, y van boven, r = straal als percentage van de breedte).
-  // Van links naar rechts. Zet ?zones=1 achter de url om de tikzones
-  // als rode cirkels te zien en ze bij te stellen.
+  // Van links naar rechts staan op de foto: Dennus, Kruidn, Spriet, Seppe.
+  // Zet ?zones=1 achter de url om de tikzones als rode cirkels te zien en
+  // ze bij te stellen.
   dogtags: [
-    { player: "?", x: 22, y: 33, r: 8, rank: "TODO", specialty: "TODO" },
-    { player: "?", x: 40, y: 30, r: 8, rank: "TODO", specialty: "TODO" },
-    { player: "?", x: 53, y: 40, r: 8, rank: "TODO", specialty: "TODO" },
-    { player: "?", x: 73, y: 36, r: 8, rank: "TODO", specialty: "TODO" },
+    { player: "dennus", name: "DENNUS", x: 22, y: 33, r: 8,
+      rank: "Korporaal Drankbevoorrading",
+      specialty: "Ad fundum onder vijandelijk vuur. Kent elke BV persoonlijk." },
+    { player: "kruidn", name: "KRUIDN", x: 40, y: 30, r: 8,
+      rank: "Verkenner 1e klas",
+      specialty: "Instagram-surveillance. Spot elk model binnen 5 km." },
+    { player: "spriet", name: "SPRIET", x: 53, y: 40, r: 8,
+      rank: "Historicus van dienst",
+      specialty: "Weet alles over de oorlog. Vertelt het ook allemaal." },
+    { player: "seppe", name: "SEPPE", x: 73, y: 36, r: 8,
+      rank: "Opperbevelhebber",
+      specialty: "Zette voor het eerst iets in de agenda op de juiste dag." },
   ],
   dogtagHoldMs: 500,
-  dogtagSeparator: " · ",
 
   // 6. Rangen per aantal aangevinkte vakjes. fullCard: enkel bij een volle
   // kaart. chevrons = strepen, stars = sterren op het insigne.

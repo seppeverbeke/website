@@ -829,7 +829,7 @@ function updateLanding() {
 
   if (phase === "before") {
     const diff = Math.max(0, new Date(MISSION.start).getTime() - nowMs());
-    phaseEl.textContent = "AFTELLING";
+    phaseEl.classList.add("hidden");
     clock.classList.remove("hidden");
     const pad = (n) => String(n).padStart(2, "0");
     setDigit($("cd-d"), pad(Math.floor(diff / 86400000)));
@@ -840,6 +840,7 @@ function updateLanding() {
     note.textContent = `Beschikbaar op ${date} om ${time}`;
   } else {
     phaseEl.textContent = "MISSIE BEZIG";
+    phaseEl.classList.remove("hidden");
     clock.classList.add("hidden");
     note.textContent = "";
   }
@@ -847,8 +848,40 @@ function updateLanding() {
   const open = phase !== "before";
   if (btn.disabled === open) {
     btn.disabled = !open;
-    btn.classList.toggle("breathe", open && !reduced());
+    if (open) unlockEnlist(btn, enlistChecked);
   }
+  enlistChecked = true;
+}
+
+// op het startmoment springt het slot open, schuift weg en begint de knop te ademen
+let enlistChecked = false;
+function unlockEnlist(btn, animate) {
+  const lock = btn.querySelector(".btn-lock");
+  const breathe = () => btn.classList.toggle("breathe", !reduced());
+  if (!lock) { breathe(); return; }
+  // bij het laden na de start, of met minder beweging: het slot verdwijnt gewoon
+  if (!animate || reduced()) { lock.remove(); breathe(); return; }
+  const label = btn.querySelector(".btn-label");
+  lock.textContent = "🔓";
+  lock.animate([
+    { transform: "scale(1) rotate(0deg)" },
+    { transform: "scale(1.45) rotate(-16deg)", offset: 0.5 },
+    { transform: "scale(1.2) rotate(0deg)" },
+  ], { duration: 320, easing: "ease-out", fill: "forwards" }).finished.then(() => {
+    // het slot verlaat de regel; de tekst schuift soepel naar het midden
+    const labelBefore = label.getBoundingClientRect().left;
+    const lockRect = lock.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+    lock.style.position = "absolute";
+    lock.style.left = `${lockRect.left - btnRect.left}px`;
+    lock.style.top = `${lockRect.top - btnRect.top}px`;
+    const shift = labelBefore - label.getBoundingClientRect().left;
+    label.animate([{ transform: `translateX(${shift}px)` }, { transform: "translateX(0)" }], { duration: 380, easing: "ease-out" });
+    return lock.animate([
+      { transform: "scale(1.2) translateX(0)", opacity: 1 },
+      { transform: "scale(1) translateX(-34px)", opacity: 0 },
+    ], { duration: 380, easing: "ease-in", fill: "forwards" }).finished;
+  }).then(() => { lock.remove(); breathe(); }).catch(() => { lock.remove(); breathe(); });
 }
 
 setInterval(() => {
@@ -2007,7 +2040,9 @@ function showDogTag(i) {
   const tag = h("div", "dogtag");
   const swing = h("div", "dogtag-swing");
   const plate = h("div", "dogtag-plate");
-  plate.append(h("span", "dogtag-hole"), h("p", "dogtag-text", [d.player, d.rank, d.specialty].join(EE.dogtagSeparator)));
+  const body = h("div", "dogtag-body");
+  body.append(h("p", "dogtag-name", d.name), h("p", "dogtag-rank", d.rank), h("p", "dogtag-specialty", d.specialty));
+  plate.append(h("span", "dogtag-hole"), body);
   swing.append(chainSVG(), plate);
   tag.append(swing);
   backdrop.append(tag);

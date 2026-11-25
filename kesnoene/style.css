@@ -1116,7 +1116,6 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
   letter-spacing: 0.04em;
   line-height: 1.3;
 }
-#screen-landing[data-mode="anniversary"] .stamp { top: calc(70px + var(--safe-t)); }
 
 /* ---------- voorbeeld verlaten ---------- */
 .preview-exit {
@@ -1354,7 +1353,7 @@ body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
 .dogtag-chain .chain-link { fill: none; stroke: #b9bdb8; stroke-width: 2.4; }
 .dogtag-plate {
   position: relative;
-  width: min(250px, 72vw);
+  width: min(300px, 86vw);
   min-height: 118px;
   margin-top: -6px;
   padding: 34px 18px 20px;
@@ -1378,17 +1377,19 @@ body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
   background: #25282a;
   box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.6);
 }
-.dogtag-text {
+.dogtag-body { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.dogtag-name, .dogtag-rank, .dogtag-specialty {
+  margin: 0;
   font-family: var(--font-mono);
   font-weight: 700;
-  font-size: 17px;
-  line-height: 1.5;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #7b807a;
   text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.85), -1px -1px 0 rgba(0, 0, 0, 0.4);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
+.dogtag-name { font-size: 24px; letter-spacing: 0.16em; line-height: 1.1; }
+.dogtag-rank { font-size: 14px; letter-spacing: 0.08em; line-height: 1.35; padding-top: 10px; border-top: 2px solid rgba(0, 0, 0, 0.18); box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.6); }
+.dogtag-specialty { font-size: 12px; letter-spacing: 0.04em; line-height: 1.45; font-weight: 500; }
 
 /* ---------- insigne ---------- */
 .rank-badge { display: inline-flex; width: 24px; height: 24px; flex: none; }
@@ -1444,3 +1445,7 @@ body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
 }
 
 .main-header .link-btn { padding: 0 4px; min-width: var(--tap); }
+
+/* ---------- knop met slotje ---------- */
+#btn-enlist { position: relative; }
+.btn-lock { display: inline-block; margin-right: 8px; line-height: 1; transform-origin: center; }
