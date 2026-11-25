@@ -576,11 +576,12 @@ body.undo-active .tab-panel { padding-bottom: calc(96px + var(--safe-b)); }
   line-height: 1.22;
   color: var(--ink);
   max-width: 100%;
-  /* breken op woordgrenzen; midden in een woord alleen als het woord echt niet past */
-  overflow-wrap: break-word;
+  /* lange woorden breken met een koppelteken (lang="nl"); alleen als dat niet kan, op een letter */
   word-break: normal;
-  -webkit-hyphens: none;
-  hyphens: none;
+  overflow-wrap: break-word;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  hyphenate-limit-chars: 6 3 3;
 }
 
 .about-you-label {
