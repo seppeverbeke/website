@@ -1522,7 +1522,6 @@ body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
   color: var(--ink);
 }
 .briefing-list li::before { content: "\25AA"; position: absolute; left: 2px; color: var(--red); }
-.briefing-os { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; }
 .briefing-map {
   display: flex;
   align-items: center;

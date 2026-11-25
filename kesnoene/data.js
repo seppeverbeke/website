@@ -80,8 +80,6 @@ export const CELLS = [
 // =====================================================================
 // BRIEFING op de landingspagina (voor MISSION.start, daarna verdwijnt hij
 // vanzelf). Alle teksten hier; niets hardgecodeerd in app.js.
-// Items in een lijst zijn tekst, of { install: true } voor de uitleg om de
-// pagina op het beginscherm te zetten (de juiste variant per toestel).
 // =====================================================================
 export const BRIEFING = {
   title: "BRIEFING",
@@ -109,20 +107,9 @@ export const BRIEFING = {
     },
     {
       heading: "VOORBEREIDING",
-      items: [
-        "Open deze pagina in Safari of Chrome, niet in WhatsApp.",
-        { install: true },
-        "Je persoonlijke code krijg je op de dag zelf.",
-      ],
+      items: ["Je persoonlijke code krijg je op de dag zelf."],
     },
   ],
-  install: {
-    lead: "Zet ze op je beginscherm.",
-    ios: "Tik op Delen → Zet op beginscherm.",
-    android: "Tik op ⋮ → Toevoegen aan startscherm.",
-    iosLabel: "iPhone:",
-    androidLabel: "Android:",
-  },
 };
 
 // Spelregels, getoond in een uitklapbaar blok op de kaart. Vul later aan.

@@ -807,15 +807,6 @@ const isAndroid = () => /Android/i.test(navigator.userAgent);
 // iPad in "desktop"-modus meldt zich als Mac met touch; Android gaat altijd voor
 const isIOS = () => !isAndroid() && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
-function renderInstall(li) {
-  const I = BRIEFING.install;
-  li.append(`${I.lead} `);
-  // de juiste uitleg per toestel; onbekend toestel (bv. computer): beide
-  if (isIOS()) li.append(I.ios);
-  else if (isAndroid()) li.append(I.android);
-  else li.append(h("strong", "briefing-os", I.iosLabel), ` ${I.ios} `, h("strong", "briefing-os", I.androidLabel), ` ${I.android}`);
-}
-
 function buildBriefingBody() {
   const body = $("briefing-body");
   body.replaceChildren();
@@ -833,11 +824,7 @@ function buildBriefingBody() {
     }
     if (sec.items) {
       const list = h("ul", "briefing-list");
-      sec.items.forEach((item) => {
-        const li = h("li");
-        if (typeof item === "string") li.textContent = item; else if (item.install) renderInstall(li);
-        list.append(li);
-      });
+      sec.items.forEach((item) => list.append(h("li", "", item)));
       block.append(list);
     }
     body.append(block);
