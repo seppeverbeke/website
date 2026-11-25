@@ -26,12 +26,14 @@ export const PLAYERS = [
   { id: "kruidn", name: "Kruidn" },
 ];
 
-// Kaartopbouw per speler
+// Kaartopbouw per speler: kolommen x rijen (5 x 6 = 30 vakjes)
 export const CARD = {
-  size: 4,              // 4 = 4x4 (16 vakjes, geen gratis vakje) · 5 = 5x5 (24 + gratis midden)
-  activities: 4,        // aantal vergrendelde activiteitenvakjes per kaart
-  personal: 4,          // aantal vakjes over ANDERE spelers per kaart
-  // de rest wordt aangevuld met algemene vakjes
+  cols: 5,
+  rows: 6,
+  activities: 4,        // vergrendelde activiteitenvakjes per kaart
+  personal: 9,          // vakjes over ANDERE spelers per kaart
+  free: false,          // true = gratis vakje in het midden
+  // de rest wordt aangevuld met algemene vakjes (30 - 4 - 9 = 17)
 };
 
 // Neutrale stop-id's, enkel om activiteitenvakjes te verdelen. De echte
@@ -63,6 +65,7 @@ export const CELLS = [
   { id: "g21", type: "general", icon: "🗣️", text: "Iemand zegt \"Venske\" of \"Gregn B\"" },
   { id: "g22", type: "general", icon: "🤮", text: "Een drankje komt er terug uit" },
   { id: "g23", type: "general", icon: "💋", text: "Iemand vertelt over het kussen van Maureen" },
+  { id: "g24", type: "general", icon: "🍻", text: "Iemand haalt te snel nog een rondje voor de rest" },
 
   // ---- persoonlijk (nooit op de eigen kaart) ----
   { id: "p01", type: "personal", about: "dennus", icon: "🍺", text: "Dennus drinkt een drankje ad fundum" },
@@ -124,7 +127,7 @@ export const BRIEFING = {
 // =====================================================================
 export const GAME = {
   ticksPerBon: 3,       // per 3 aangevinkte vakjes 1 bon
-  bonPerLine: 1,        // extra bon per volle rij, kolom of diagonaal
+  bonPerLine: 1,        // extra bon per volle rij of kolom
   drinkWord: "drankje", // tekst in de app, pas ik later nog aan
 
   // teksten van het spel; {drinkWord} wordt vervangen door drinkWord
@@ -150,7 +153,7 @@ export const GAME = {
 export const RULES = [
   "Zie je iets op je kaart gebeuren? Tik het aan.",
   "Per {ticksPerBon} vakjes verdien je een drankbon.",
-  "Elke volle rij, kolom of diagonaal: een extra bon.",
+  "Elke volle rij of kolom: een extra bon.",
   "Met een bon geef je iemand een {drinkWord}. Wanneer en aan wie je wil.",
   "Een bevel weigeren kan niet, soldaat.",
 ];

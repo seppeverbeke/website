@@ -197,7 +197,7 @@ function buildCard(playerId) {
   chosen.push(...personalPicked);
 
   // 3. aanvullen met algemeen
-  const totalSlots = CARD.size * CARD.size - (CARD.size === 5 ? 1 : 0);
+  const totalSlots = playableTotal();
   let needed = totalSlots - chosen.length;
   const generalPool = seededShuffle(CELLS.filter((c) => c.type === "general" && !used.has(c.id)), rng);
   for (let i = 0; needed > 0 && i < generalPool.length; i++, needed--) {
@@ -215,16 +215,11 @@ function buildCard(playerId) {
 
   // 4. alles schudden en op het raster plaatsen
   const shuffled = seededShuffle(chosen, rng);
-  const size = CARD.size;
-  const grid = new Array(size * size).fill(null);
-  if (size === 5) {
-    const center = Math.floor((size * size) / 2);
-    grid[center] = { id: "free", type: "free", icon: "⭐", text: "KESNOENE" };
-    let p = 0;
-    for (let i = 0; i < grid.length; i++) { if (i !== center) grid[i] = shuffled[p++]; }
-  } else {
-    for (let i = 0; i < grid.length; i++) grid[i] = shuffled[i];
-  }
+  const grid = new Array(CARD.cols * CARD.rows).fill(null);
+  const center = CARD.free ? Math.floor(CARD.rows / 2) * CARD.cols + Math.floor(CARD.cols / 2) : -1;
+  if (center >= 0) grid[center] = { id: "free", type: "free", icon: "⭐", text: "KESNOENE" };
+  let p = 0;
+  for (let i = 0; i < grid.length; i++) { if (i !== center) grid[i] = shuffled[p++]; }
   return grid;
 }
 
@@ -233,19 +228,19 @@ function buildCard(playerId) {
 // ---------------------------------------------------------------------
 const isCellTicked = (cell, set) => cell.type === "free" || set.has(cell.id);
 
-function gridLines(size) {
+// enkel rijen (cols vakjes) en kolommen (rows vakjes), geen diagonalen
+function gridLines() {
+  const { cols, rows } = CARD;
   const lines = [];
-  for (let r = 0; r < size; r++) lines.push({ key: "row" + r, idxs: Array.from({ length: size }, (_, c) => r * size + c) });
-  for (let c = 0; c < size; c++) lines.push({ key: "col" + c, idxs: Array.from({ length: size }, (_, r) => r * size + c) });
-  lines.push({ key: "diag1", idxs: Array.from({ length: size }, (_, i) => i * size + i) });
-  lines.push({ key: "diag2", idxs: Array.from({ length: size }, (_, i) => i * size + (size - 1 - i)) });
+  for (let r = 0; r < rows; r++) lines.push({ key: "row" + r, idxs: Array.from({ length: cols }, (_, c) => r * cols + c) });
+  for (let c = 0; c < cols; c++) lines.push({ key: "col" + c, idxs: Array.from({ length: rows }, (_, r) => r * cols + c) });
   return lines;
 }
 function computeCompletedLines(grid, set) {
-  return gridLines(CARD.size).filter((l) => l.idxs.every((i) => isCellTicked(grid[i], set))).map((l) => l.key);
+  return gridLines().filter((l) => l.idxs.every((i) => isCellTicked(grid[i], set))).map((l) => l.key);
 }
 const isFullCard = (grid, set) => grid.every((cell) => isCellTicked(cell, set));
-const playableTotal = () => CARD.size * CARD.size - (CARD.size === 5 ? 1 : 0);
+function playableTotal() { return CARD.cols * CARD.rows - (CARD.free ? 1 : 0); }
 
 const tickedCount = (grid, set) => grid.filter((c) => c.type !== "free" && set.has(c.id)).length;
 
@@ -1199,7 +1194,7 @@ function setLockFace(el) {
 
 function buildCardDOM() {
   const grid = $("card-grid");
-  grid.style.setProperty("--size", CARD.size);
+  grid.style.setProperty("--cols", CARD.cols);
   grid.replaceChildren();
   cellEls.clear();
   state.card.forEach((cell) => {
@@ -1470,7 +1465,7 @@ async function playBingo(lineKeys) {
   vibrate([35, 70, 35, 70, 35]);
   if (!reduced()) {
     const order = [];
-    gridLines(CARD.size).filter((l) => lineKeys.includes(l.key)).forEach((l) => l.idxs.forEach((i) => { if (!order.includes(i)) order.push(i); }));
+    gridLines().filter((l) => lineKeys.includes(l.key)).forEach((l) => l.idxs.forEach((i) => { if (!order.includes(i)) order.push(i); }));
     const runs = order.map((idx, n) => {
       const el = cellEls.get(state.card[idx].id);
       if (!el) return Promise.resolve();
@@ -1690,7 +1685,7 @@ async function renderReveal() {
     const block = h("div", "reveal-player-block");
     block.append(h("p", "reveal-player-name", p.name));
     const grid = h("div", "card-grid");
-    grid.style.setProperty("--size", CARD.size);
+    grid.style.setProperty("--cols", CARD.cols);
     buildCard(p.id).forEach((cell) => {
       const el = createCellEl(cell);
       const content = getContent(cell);
