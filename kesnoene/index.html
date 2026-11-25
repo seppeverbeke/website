@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="Bingo voor de missie van 28.11.2026.">
+  <title>MISSION KESNOENE</title>
+  <link rel="manifest" href="/kesnoene/manifest.webmanifest">
+  <link rel="apple-touch-icon" href="/kesnoene/apple-touch-icon.png">
+  <link rel="icon" href="/kesnoene/icon-192.png" type="image/png">
+  <meta name="theme-color" content="#15170d">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preload" as="image" type="image/webp" fetchpriority="high"
+        imagesrcset="/kesnoene/hero-800.webp 800w, /kesnoene/hero.webp 1254w" imagesizes="min(100vw, 480px)">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- lettertypes blokkeren het tekenen niet: eerst reservetekst, dan swap -->
+  <link href="https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@400;700&family=Special+Elite&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@400;700&family=Special+Elite&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/kesnoene/style.css">
+</head>
+<body>
+
+  <div id="banner-warning" class="banner-warning hidden" role="alert"></div>
+  <div id="toast-root" aria-live="polite"></div>
+  <div id="modal-root"></div>
+  <div id="dogtag-root" aria-live="polite"></div>
+  <div id="car-layer" class="car-layer"></div>
+  <div id="credits" class="credits hidden" role="dialog"></div>
+  <button id="preview-exit" class="preview-exit hidden" type="button"></button>
+
+  <main id="app">
+
+    <!-- ===================== LANDING ===================== -->
+    <section id="screen-landing" class="screen active" data-screen="landing" aria-label="Startpagina">
+      <div class="landing">
+        <div id="anniv-banner" class="anniv-banner hidden" data-show="anniversary" role="status"></div>
+        <div class="hero">
+          <div id="hero-zoom" class="hero-zoom">
+          <picture>
+            <source type="image/webp" srcset="/kesnoene/hero-800.webp 800w, /kesnoene/hero.webp 1254w" sizes="min(100vw, 480px)">
+            <img class="hero-img" src="/kesnoene/hero.jpg" srcset="/kesnoene/hero-800.jpg 800w, /kesnoene/hero.jpg 1254w" sizes="min(100vw, 480px)" alt="Vier vrienden in legeruniform rond een tafel" width="1254" height="1254" fetchpriority="high" decoding="async">
+          </picture>
+          </div>
+          <div class="hero-grain"></div>
+          <div class="hero-fade"></div>
+          <button type="button" id="admin-stamp" class="stamp" aria-label="TOP SECRET">TOP SECRET</button>
+        </div>
+
+        <div class="landing-content">
+          <h1 class="mission-title" data-show="before during credits anniversary">MISSION<br>KESNOENE</h1>
+          <p class="mission-date" data-show="before during credits anniversary">28.11.2026</p>
+
+          <div class="countdown" id="countdown" data-show="before during">
+            <p class="countdown-phase" id="countdown-phase">AFTELLING</p>
+            <div class="countdown-clock" id="countdown-clock">
+              <div class="unit"><span class="num" id="cd-d">00</span><span class="lbl">DAGEN</span></div>
+              <div class="unit"><span class="num" id="cd-h">00</span><span class="lbl">UREN</span></div>
+              <div class="unit"><span class="num" id="cd-m">00</span><span class="lbl">MIN</span></div>
+              <div class="unit"><span class="num" id="cd-s">00</span><span class="lbl">SEC</span></div>
+            </div>
+          </div>
+
+          <p class="briefing" data-show="before during">TOP SECRET &middot; Briefing volgt op de dag zelf.</p>
+
+          <button id="btn-enlist" class="btn-primary" type="button" disabled data-show="before during">Meld je aan, soldaat</button>
+          <p class="enlist-note" id="enlist-note" data-show="before during"></p>
+
+          <div id="memorial-block" class="post-block hidden" data-show="memorial">
+            <h2 id="memorial-title" class="memorial-title"></h2>
+            <p id="memorial-line" class="memorial-line"></p>
+            <button id="btn-memorial-replay" class="btn-secondary" type="button"></button>
+            <button id="btn-memorial-card" class="btn-primary" type="button"></button>
+          </div>
+
+          <div id="anniv-block" class="post-block hidden" data-show="credits anniversary">
+            <button id="btn-anniv-replay" class="btn-primary" type="button"></button>
+            <button id="btn-anniv-card" class="btn-secondary" type="button"></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LOGIN ===================== -->
+    <section id="screen-login" class="screen" data-screen="login" aria-label="Aanmelden">
+      <div class="panel">
+        <h2>Wie ben jij, soldaat?</h2>
+        <div id="player-buttons" class="player-grid"></div>
+
+        <div id="code-entry" class="code-entry hidden">
+          <p id="code-entry-name" class="panel-sub"></p>
+          <input id="code-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="----" aria-label="Code van 4 cijfers">
+          <p id="code-error" class="error hidden" role="alert"></p>
+          <button id="btn-code-back" class="btn-secondary" type="button">Terug</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== LOCKED PREVIEW ===================== -->
+    <section id="screen-locked" class="screen" data-screen="locked" aria-label="Kaart nog vergrendeld">
+      <div class="panel">
+        <span class="stamp-static">VERGRENDELD</span>
+        <h2 id="locked-player-name"></h2>
+        <p class="locked-preview-text" id="locked-preview-text"></p>
+        <button id="btn-locked-switch" class="btn-secondary" type="button">Wissel van speler</button>
+      </div>
+    </section>
+
+    <!-- ===================== MAIN APP ===================== -->
+    <section id="screen-main" class="screen" data-screen="main" aria-label="Spel">
+      <div class="app-shell">
+        <header class="main-header">
+          <div class="conn-indicator" id="conn-indicator">&middot;</div>
+          <span id="rank-badge" class="rank-badge header-badge" role="img"></span>
+          <div class="player-tag" id="player-tag"></div>
+          <button id="btn-switch-player" class="link-btn" type="button">Wissel</button>
+        </header>
+
+        <nav class="tabs" id="tabs" aria-label="Tabbladen">
+          <button class="tab active" data-tab="card" type="button">Mijn kaart</button>
+          <button class="tab" data-tab="scoreboard" type="button">Scorebord</button>
+          <button class="tab hidden" data-tab="reveal" id="tab-reveal" type="button">Onthulling</button>
+        </nav>
+
+        <div class="tab-panel active" data-panel="card" id="panel-card">
+          <div class="card-stats">
+            <span class="count" id="card-count">0 / 16</span>
+            <span class="lines" id="card-lines">0 lijnen</span>
+          </div>
+          <p id="readonly-note" class="readonly-note hidden" role="status"></p>
+          <div class="card-grid" id="card-grid"></div>
+          <div class="rules-block">
+            <button class="rules-toggle" id="rules-toggle" type="button" aria-expanded="false">
+              <span>Spelregels</span><span id="rules-chevron" aria-hidden="true">&#9660;</span>
+            </button>
+            <div class="rules-body" id="rules-body"></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="scoreboard" id="panel-scoreboard">
+          <p class="board-title">Stand van zaken</p>
+          <div id="board-rows" class="board-rows"></div>
+          <div class="feed">
+            <p class="board-title">Laatste berichten</p>
+            <div id="feed-list" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div class="tab-panel" data-panel="reveal" id="panel-reveal">
+          <div id="reveal-content"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="/kesnoene/app.js"></script>
+</body>
+</html>
