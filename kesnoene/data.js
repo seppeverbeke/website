@@ -6,7 +6,7 @@
 // Die staan in Supabase (secret_stops, secret_cells, secret_config),
 // ingevuld via supabase-seed.sql (niet gecommit, zie .gitignore).
 //
-// Stop-id's hier zijn neutraal (s1, s2, ...) zodat ze niets verklappen.
+// Stop-id's hier zijn neutraal (s3, s7, ...) zodat ze niets verklappen.
 // Pas dit bestand aan, niet app.js.
 // Let op: na 28/11 07:00 niets meer wijzigen aan "CELLS" of "CARD",
 // anders verschuiven de kaarten van de spelers.
@@ -15,7 +15,7 @@
 export const MISSION = {
   title: "MISSION KESNOENE",
   start: "2026-11-28T07:50:00+01:00",   // aftelling loopt hiernaartoe
-  end:   "2026-11-28T20:00:00+01:00",   // daarna: "Mission accomplished"
+  end:   "2026-11-28T20:00:00+01:00",   // einde van de dag (de 2CV rijdt niet meer); de kaart blijft aanvinkbaar tot middernacht
 };
 
 // Spelers. Codes staan in secret_config, niet hier.
@@ -39,7 +39,7 @@ export const CARD = {
 // Neutrale stop-id's, enkel om activiteitenvakjes te verdelen. De echte
 // naam/icoon/uur van elke stop staat server-side (secret_stops) en is
 // enkel zichtbaar voor de spelleider via het admin-paneel.
-export const STOP_IDS = ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9"];
+export const STOP_IDS = ["s3", "s7", "s8", "s9"];
 
 // Vakjes
 // type: "general"  = kan op elke kaart
@@ -74,7 +74,7 @@ export const CELLS = [
   { id: "p03", type: "personal", about: "spriet", icon: "📜", text: "Spriet vertelt een weetje over de oorlog" },
   { id: "p07", type: "personal", about: "spriet", icon: "❓", text: "Spriet zegt \"Wie mist er nekeer niet?\"" },
   { id: "p08", type: "personal", about: "spriet", icon: "👬", text: "Spriet begint over de broers" },
-  { id: "p04", type: "personal", about: "kruidn", icon: "📸", text: "Kruidn babbelt over een (Instagram)model of actrice" },
+  { id: "p04", type: "personal", about: "kruidn", icon: "📸", text: "Kruidn babbelt over een Instagram-model of actrice" },
   { id: "p09", type: "personal", about: "kruidn", icon: "🔵", text: "Kruidn begint over Club Brugge" },
   { id: "p10", type: "personal", about: "kruidn", icon: "🥤", text: "Kruidn drinkt een frisdrank zonder reden" },
   { id: "p11", type: "personal", about: "seppe",  icon: "🔴", text: "Seppe begint over Arsenal" },
@@ -207,12 +207,6 @@ export const EASTER_EGGS = {
     button: "Begrepen 🫡",
   },
 
-  // 10. Na 20:00 tot middernacht: de missie is voorbij
-  after: {
-    title: "MISSION ACCOMPLISHED",
-    toCardButton: "Naar mijn kaart",
-  },
-
   // 11. Na middernacht (alleen-lezen)
   memorial: {
     from: "2026-11-29T00:00:00+01:00",
@@ -238,7 +232,6 @@ export const EASTER_EGGS = {
       { id: "dogtag",      label: "Dog tag tonen" },
       { id: "order",       label: "Drankbevel" },
       { id: "lockspam",    label: "Slot-spam" },
-      { id: "after",       label: "Na 20:00" },
       { id: "memorial",    label: "Na middernacht" },
       { id: "anniversary", label: "Verjaardag" },
     ],

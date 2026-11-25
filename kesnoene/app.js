@@ -65,14 +65,13 @@ let forcedMode = null;
 function computeMode() {
   const t = nowMs();
   if (t < new Date(MISSION.start).getTime()) return "before";
-  if (t < new Date(MISSION.end).getTime()) return "during";
-  if (t < new Date(EE.memorial.from).getTime()) return "after";
+  if (t < new Date(EE.memorial.from).getTime()) return "during";   // van de start tot middernacht
   const p = brusselsParts(t);
   const m = brusselsParts(new Date(MISSION.start).getTime());
   return p.y > m.y && p.mo === m.mo && p.d === m.d ? "anniversary" : "memorial";
 }
 const landingMode = () => forcedMode || computeMode();
-const isPostMission = (mode) => mode === "after" || mode === "memorial" || mode === "anniversary";
+const isPostMission = (mode) => mode === "memorial" || mode === "anniversary";
 // vanaf middernacht kan er niets meer aangevinkt worden
 const isReadOnly = () => { const m = computeMode(); return m === "memorial" || m === "anniversary"; };
 
@@ -732,8 +731,7 @@ function showScreen(name) {
 function missionPhase() {
   const t = nowMs();
   if (t < new Date(MISSION.start).getTime()) return "before";
-  if (t < new Date(MISSION.end).getTime()) return "during";
-  return "after";
+  return "during";
 }
 
 function enterGame() {
@@ -760,7 +758,7 @@ function routeOnLoad() {
   if (!player) { showScreen("landing"); return; }
   state.player = player;
   if (isPostMission(computeMode())) {
-    // na 20:00 opent de pagina op de landingspagina (generiek, herinnering, verjaardag)
+    // na middernacht opent de pagina op de landingspagina (herinnering, verjaardag)
     loadPlayerState();
     showScreen("landing");
     updateLanding();
@@ -799,7 +797,6 @@ function applyLandingMode(mode) {
   });
   const years = Math.max(1, brusselsParts(nowMs()).y - brusselsParts(new Date(MISSION.start).getTime()).y);
   $("anniv-banner").textContent = fmt(EE.anniversary.banner, { n: years });
-  $("btn-anniv-card").textContent = mode === "after" ? EE.after.toCardButton : EE.anniversary.toCardButton;
   $("preview-exit").classList.toggle("hidden", !forcedMode);
 }
 
@@ -874,12 +871,6 @@ function updateLanding() {
   if ($("screen-landing").dataset.mode !== mode) applyLandingMode(mode);
   const phaseEl = $("countdown-phase");
   const clock = $("countdown-clock");
-  if (mode === "after") {
-    phaseEl.textContent = EE.after.title;
-    phaseEl.classList.remove("hidden");
-    clock.classList.add("hidden");
-    return;
-  }
   if (mode !== "before" && mode !== "during") return;
 
   const phase = mode;
@@ -1160,12 +1151,18 @@ function lockFace() {
   return face;
 }
 
+// korte geciteerde stukken ("Gregn B", "Valla valla") blijven op één regel;
+// lange zinnen breken gewoon op spaties
+function cellLabel(text) {
+  return String(text).replace(/"([^"]{1,7})"/g, (m) => m.replace(/ /g, "\u00A0"));
+}
+
 function contentFace(content, aboutYou) {
   const face = h("div", "face face-content");
   if (aboutYou) face.append(h("span", "about-you-label", "Over jou:"));
   const icon = h("span", "cell-icon", content.icon);
   icon.setAttribute("aria-hidden", "true");
-  face.append(icon, h("span", "cell-text", content.text));
+  face.append(icon, h("span", "cell-text", cellLabel(content.text)));
   return face;
 }
 
@@ -1822,7 +1819,12 @@ function renderAdminPanel() {
   $("admin-close").addEventListener("click", closeAdminPanel);
 
   const stopsRoot = $("admin-stops");
-  adminStops.forEach((s) => {
+  // enkel stops waar een vergrendeld vakje aan hangt, gesorteerd op openingsuur
+  const withCell = new Set(CELLS.filter((c) => c.type === "activity").map((c) => c.stop));
+  adminStops
+    .filter((s) => withCell.has(s.stop_id))
+    .sort((a, b) => new Date(a.opens) - new Date(b.opens))
+    .forEach((s) => {
     const status = stopStatus(s);
     const row = h("div", "admin-stop");
     row.innerHTML = `
@@ -2393,7 +2395,7 @@ async function runEgg(id) {
     for (let i = 0; i < EE.lockSpam.taps; i++) { handleLockedTap(lockedCell); await sleep(330); }
     return;
   }
-  if (id === "after" || id === "memorial" || id === "anniversary") startPreview(id);
+  if (id === "memorial" || id === "anniversary") startPreview(id);
 }
 
 // ---------------------------------------------------------------------
