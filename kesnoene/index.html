@@ -5,6 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex, nofollow">
   <meta name="description" content="Bingo voor de missie van 28.11.2026.">
+
+  <!-- linkvoorbeeld in WhatsApp en iMessage (absolute url's) -->
+  <link rel="canonical" href="https://seppeverbeke.be/kesnoene/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MISSION KESNOENE">
+  <meta property="og:locale" content="nl_BE">
+  <meta property="og:title" content="MISSION KESNOENE">
+  <meta property="og:description" content="28.11.2026 · Briefing volgt. Meld je aan, soldaat.">
+  <meta property="og:url" content="https://seppeverbeke.be/kesnoene/">
+  <meta property="og:image" content="https://seppeverbeke.be/kesnoene/og-image.jpg">
+  <meta property="og:image:secure_url" content="https://seppeverbeke.be/kesnoene/og-image.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Vier vrienden in legeruniform onder de titel MISSION KESNOENE">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MISSION KESNOENE">
+  <meta name="twitter:description" content="28.11.2026 · Briefing volgt. Meld je aan, soldaat.">
+  <meta name="twitter:image" content="https://seppeverbeke.be/kesnoene/og-image.jpg">
+  <meta name="twitter:image:alt" content="Vier vrienden in legeruniform onder de titel MISSION KESNOENE">
   <title>MISSION KESNOENE</title>
   <link rel="manifest" href="/kesnoene/manifest.webmanifest">
   <link rel="apple-touch-icon" href="/kesnoene/apple-touch-icon.png">
@@ -63,6 +83,14 @@
               <div class="unit"><span class="num" id="cd-s">00</span><span class="lbl">SEC</span></div>
             </div>
           </div>
+
+          <section id="briefing" class="briefing-card hidden" data-show="before" aria-labelledby="briefing-title">
+            <div class="briefing-head">
+              <h2 id="briefing-title" class="briefing-title"></h2>
+              <button id="briefing-toggle" class="briefing-toggle" type="button" aria-expanded="false" aria-controls="briefing-body"></button>
+            </div>
+            <div id="briefing-body" class="briefing-body hidden"></div>
+          </section>
 
           <p class="briefing" data-show="before during">TOP SECRET &middot; Briefing volgt op de dag zelf.</p>
 

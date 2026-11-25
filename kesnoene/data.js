@@ -77,6 +77,54 @@ export const CELLS = [
   // TODO: minstens 1 per stop
 ];
 
+// =====================================================================
+// BRIEFING op de landingspagina (voor MISSION.start, daarna verdwijnt hij
+// vanzelf). Alle teksten hier; niets hardgecodeerd in app.js.
+// Items in een lijst zijn tekst, of { install: true } voor de uitleg om de
+// pagina op het beginscherm te zetten (de juiste variant per toestel).
+// =====================================================================
+export const BRIEFING = {
+  title: "BRIEFING",
+  openButton: "Lees je orders",
+  closeButton: "Sluit de orders",
+  sections: [
+    {
+      heading: "RENDEZ-VOUS",
+      lines: [
+        "Station Izegem · Stationsstraat 2A",
+        "50°55'15.4\"N 3°12'53.3\"E",
+        "Zaterdag 28.11 · 07:40 stipt",
+      ],
+      map: {
+        label: "Open in Maps",
+        lat: 50.920944,
+        lng: 3.214806,
+        apple: "https://maps.apple.com/?ll={lat},{lng}&q=Station%20Izegem",
+        google: "https://www.google.com/maps/search/?api=1&query={lat},{lng}",
+      },
+    },
+    {
+      heading: "UITRUSTING",
+      items: ["Warme, waterdichte kledij", "Goeie schoenen", "Identiteitskaart", "Opgeladen gsm"],
+    },
+    {
+      heading: "VOORBEREIDING",
+      items: [
+        "Open deze pagina in Safari of Chrome, niet in WhatsApp.",
+        { install: true },
+        "Je persoonlijke code krijg je op de dag zelf.",
+      ],
+    },
+  ],
+  install: {
+    lead: "Zet ze op je beginscherm.",
+    ios: "Tik op Delen → Zet op beginscherm.",
+    android: "Tik op ⋮ → Toevoegen aan startscherm.",
+    iosLabel: "iPhone:",
+    androidLabel: "Android:",
+  },
+};
+
 // Spelregels, getoond in een uitklapbaar blok op de kaart. Vul later aan.
 export const RULES = [];
 

@@ -1449,3 +1449,86 @@ body.credits-open .car-layer, body.credits-open #toast-root { z-index: 240; }
 /* ---------- knop met slotje ---------- */
 #btn-enlist { position: relative; }
 .btn-lock { display: inline-block; margin-right: 8px; line-height: 1; transform-origin: center; }
+
+
+/* ---------- briefing: getypt legerbericht op papier ---------- */
+.briefing-card {
+  width: 100%;
+  max-width: 340px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1.5px solid var(--black);
+  border-radius: 3px;
+  box-shadow: 0 3px 0 var(--black), inset 0 0 0 4px rgba(28, 26, 20, 0.05);
+  text-align: left;
+  transform: rotate(-0.5deg);
+}
+.briefing-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 8px 6px 14px;
+  min-height: 56px;
+}
+.briefing-title {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-transform: none;
+  color: var(--red);
+  border: 2px solid var(--red);
+  padding: 3px 8px 3px 11px;
+  transform: rotate(-2deg);
+  opacity: 0.92;
+}
+.briefing-toggle {
+  min-height: var(--tap);
+  padding: 0 12px;
+  background: var(--olive);
+  color: var(--khaki-light);
+  border: 1.5px solid var(--black);
+  border-radius: 3px;
+  font-family: var(--font-type);
+  font-size: 13px;
+  box-shadow: 0 2px 0 var(--black);
+}
+.briefing-body {
+  padding: 2px 16px 18px;
+  border-top: 1px dashed rgba(28, 26, 20, 0.5);
+  transform-origin: top center;
+}
+.briefing-section { margin-top: 16px; }
+.briefing-heading {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: none;
+  color: var(--ink);
+  border-bottom: 1.5px solid rgba(28, 26, 20, 0.55);
+  padding-bottom: 3px;
+  margin-bottom: 8px;
+}
+.briefing-line { font-size: 15px; line-height: 1.55; color: var(--ink); }
+.briefing-list { margin: 0; padding: 0; list-style: none; }
+.briefing-list li {
+  position: relative;
+  padding-left: 18px;
+  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.briefing-list li::before { content: "\25AA"; position: absolute; left: 2px; color: var(--red); }
+.briefing-os { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; }
+.briefing-map {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: none;
+  margin-top: 10px;
+  text-decoration: none;
+}

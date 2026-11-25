@@ -5,7 +5,7 @@
 // zodra de server het toelaat (RLS + rpc's, zie supabase.sql).
 // =====================================================================
 
-import { MISSION, PLAYERS, CARD, CELLS, RULES, EASTER_EGGS as EE } from "./data.js";
+import { MISSION, PLAYERS, CARD, CELLS, RULES, BRIEFING, EASTER_EGGS as EE } from "./data.js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
 const SUPABASE_CDN = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
@@ -800,7 +800,77 @@ function applyLandingMode(mode) {
   $("preview-exit").classList.toggle("hidden", !forcedMode);
 }
 
+// ---------------------------------------------------------------------
+// briefing (voor de start; verdwijnt vanzelf via data-show="before")
+// ---------------------------------------------------------------------
+const isAndroid = () => /Android/i.test(navigator.userAgent);
+// iPad in "desktop"-modus meldt zich als Mac met touch; Android gaat altijd voor
+const isIOS = () => !isAndroid() && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
+function renderInstall(li) {
+  const I = BRIEFING.install;
+  li.append(`${I.lead} `);
+  // de juiste uitleg per toestel; onbekend toestel (bv. computer): beide
+  if (isIOS()) li.append(I.ios);
+  else if (isAndroid()) li.append(I.android);
+  else li.append(h("strong", "briefing-os", I.iosLabel), ` ${I.ios} `, h("strong", "briefing-os", I.androidLabel), ` ${I.android}`);
+}
+
+function buildBriefingBody() {
+  const body = $("briefing-body");
+  body.replaceChildren();
+  BRIEFING.sections.forEach((sec) => {
+    const block = h("div", "briefing-section");
+    block.append(h("h3", "briefing-heading", sec.heading));
+    (sec.lines || []).forEach((line) => block.append(h("p", "briefing-line", line)));
+    if (sec.map) {
+      const m = sec.map;
+      const link = h("a", "btn-primary briefing-map", m.label);
+      link.href = fmt(isIOS() ? m.apple : m.google, { lat: m.lat, lng: m.lng });
+      link.target = "_blank";
+      link.rel = "noopener";
+      block.append(link);
+    }
+    if (sec.items) {
+      const list = h("ul", "briefing-list");
+      sec.items.forEach((item) => {
+        const li = h("li");
+        if (typeof item === "string") li.textContent = item; else if (item.install) renderInstall(li);
+        list.append(li);
+      });
+      block.append(list);
+    }
+    body.append(block);
+  });
+}
+
+function setBriefingOpen(open, animate = true) {
+  const body = $("briefing-body");
+  const btn = $("briefing-toggle");
+  btn.setAttribute("aria-expanded", String(open));
+  btn.textContent = open ? BRIEFING.closeButton : BRIEFING.openButton;
+  if (open) {
+    buildBriefingBody();
+    body.classList.remove("hidden");
+    if (animate && !reduced()) {
+      body.animate([{ opacity: 0, transform: "translateY(-10px) scaleY(0.94)" }, { opacity: 1, transform: "none" }], { duration: 260, easing: "ease-out" });
+    }
+    if (animate) requestAnimationFrame(() => $("briefing").scrollIntoView({ block: "start", behavior: reduced() ? "auto" : "smooth" }));
+  } else if (animate && !reduced() && !body.classList.contains("hidden")) {
+    body.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 160 }).onfinish = () => body.classList.add("hidden");
+  } else {
+    body.classList.add("hidden");
+  }
+}
+
+function initBriefing() {
+  $("briefing-title").textContent = BRIEFING.title;
+  setBriefingOpen(false, false);
+  $("briefing-toggle").addEventListener("click", () => setBriefingOpen($("briefing-toggle").getAttribute("aria-expanded") !== "true"));
+}
+
 function initLandingTexts() {
+  initBriefing();
   $("memorial-title").textContent = EE.memorial.title;
   $("memorial-line").textContent = EE.memorial.line;
   $("btn-memorial-replay").textContent = EE.memorial.replayButton;
