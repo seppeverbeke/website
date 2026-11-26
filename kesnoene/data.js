@@ -6,7 +6,7 @@
 // Die staan in Supabase (secret_stops, secret_cells, secret_config),
 // ingevuld via supabase-seed.sql (niet gecommit, zie .gitignore).
 //
-// Stop-id's hier zijn neutraal (s3, s7, ...) zodat ze niets verklappen.
+// Stop-id's hier zijn neutraal (s2, s3, ...) zodat ze niets verklappen.
 // Pas dit bestand aan, niet app.js.
 // Let op: na 28/11 07:00 niets meer wijzigen aan "CELLS" of "CARD",
 // anders verschuiven de kaarten van de spelers.
@@ -30,16 +30,16 @@ export const PLAYERS = [
 export const CARD = {
   cols: 5,
   rows: 6,
-  activities: 4,        // vergrendelde activiteitenvakjes per kaart
+  activities: 6,        // vergrendelde activiteitenvakjes per kaart
   personal: 9,          // vakjes over ANDERE spelers per kaart
   free: false,          // true = gratis vakje in het midden
-  // de rest wordt aangevuld met algemene vakjes (30 - 4 - 9 = 17)
+  // de rest wordt aangevuld met algemene vakjes (30 - 6 - 9 = 15)
 };
 
 // Neutrale stop-id's, enkel om activiteitenvakjes te verdelen. De echte
 // naam/icoon/uur van elke stop staat server-side (secret_stops) en is
 // enkel zichtbaar voor de spelleider via het admin-paneel.
-export const STOP_IDS = ["s3", "s7", "s8", "s9"];
+export const STOP_IDS = ["s2", "s3", "s7", "s8", "s9"];
 
 // Vakjes
 // type: "general"  = kan op elke kaart
@@ -50,8 +50,6 @@ export const STOP_IDS = ["s3", "s7", "s8", "s9"];
 export const CELLS = [
   // ---- algemeen ----
   { id: "g01", type: "general", icon: "💤", text: "Iemand slaapt op de trein" },
-  { id: "g02", type: "general", icon: "🚗", text: "De 2CV valt stil" },
-  { id: "g03", type: "general", icon: "↩️", text: "Foute weg ingeslagen" },
   { id: "g04", type: "general", icon: "🇩🇪", text: "Iemand doet een Duits accent" },
   { id: "g05", type: "general", icon: "🫡", text: "Iemand salueert" },
   { id: "g06", type: "general", icon: "🍸", text: "Er wordt een picon besteld" },
@@ -86,6 +84,8 @@ export const CELLS = [
   { id: "a02", type: "activity", stop: "s7" },
   { id: "a03", type: "activity", stop: "s8" },
   { id: "a04", type: "activity", stop: "s9" },
+  { id: "a05", type: "activity", stop: "s2" },
+  { id: "a06", type: "activity", stop: "s2" },
 ];
 
 // =====================================================================
